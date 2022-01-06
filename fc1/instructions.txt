@@ -3,7 +3,7 @@ FC-1
 
 The FC-1 is a general-purpose 24-bit processor supporting up to 16MB of memory.  It has a memory management unit and a fixed-point coprocessor (for 16-bit.8-bit decimal numbers).
 
-There are 12 general-purpose, 24-bit registers.  There are 8 "extended" registers for setting CPU attributes such as virtual memory boundaries, or where the stack is.
+There are 10 general-purpose, 24-bit registers.  There are 8 "extended" registers for setting CPU attributes such as where the stack is.
 
 There is 1 24-bit memory bus.  There are 2 12-bit generic IO busses.  Events are primarily interrupt-driven.  Memory-mapped IO is supported.
 
@@ -36,21 +36,48 @@ compare   0000100 0 Compare SRC to DEST, and store the result in A4
 jump      0000100 1 If A4 == SRC, jump to VALUE
 idjump    0000101 0 If A4 == SRC, jump to the address stored in DEST
 rjump     0000101 1 If A4 == SRC, jump to relative offset VALUE
-== Numerical operations ==
+== Integer operations ==
+add       0000110 0 DEST += SRC
+addi      0000110 1 DEST += VALUE
+sub       0000111 0 DEST -= SRC
+subi      0000111 1 DEST -= VALUE
+mult      0001000 0 DEST *= SRC
+multi     0001000 1 DEST *= VALUE
+div       0001001 0 DEST /= SRC
+divi      0001001 1 DEST /= VALUE
+lshift    0001010 0 DEST <<= SRC
+lshifti   0001010 1 DEST <<= VALUE
+rshift    0001011 0 DEST >>= SRC
+rshifti   0001011 1 DEST >>= VALUE
+not       0001100 0 DEST not= DEST
+--------- 0001100 1 illegal instruction
+and       0001101 0 DEST &= SRC
+andi      0001101 1 DEST &= VALUE
+or        0001110 0 DEST |= SRC
+ori       0001110 1 DEST |= VALUE
+xor       0001111 0 DEST ~= SRC
+xori      0001111 1 DEST ~= VALUE
 == Interrupts ==
 seti      1111110 0 Enable interrupts
 clri      1111111 0 Disable interrupts
 
 ATTRIBUTE REGISTERS
 -----------------------
+These may be written to like the other registers, but care should be taken or things may break.
 A0 | Program counter
 A1 | Stack root pointer
 A2 | Current stack index pointer
 A3 | Pointer to the in-memory segment descriptor table (see below)
 A4 | Pointer to the interrupt vector table
 A5 | Result of the 'compare' instruction (flag register)
-A6 | 
-A7 | 
+    bitmap:
+             0 | carry
+             1 | greater
+             2 | less
+             3 | equal
+             4 | positive
+             5 | negative
+         6..23 | unused, always 0
 
 SEGMENT DESCRIPTOR TABLE
 ---------------------------
