@@ -1,0 +1,18 @@
+MC-1 CPU
+========
+
+This CPU is 8-bit with an 8-bit address bus, for a maximum of 256 bytes of memory. It has 4 general-purpose registers.
+
+Instruction format:
+
+  OPCODE  EXTEND  REGA    REGB
+  3 bits  1 bit  2 bits  2 bits
+
+If EXTEND is set, there is another 8 bit argument on the end.
+
+OPCODEs, their mnemonics, and descriptions:
+  000 - load
+    EXTEND: ldi - LoaD Immediate; REGA = <extra 8 bit argument>
+      else: ldr - LoaD Register;  REGA = REGB
+  001 + EXTEND: store
+  001 without EXTEND: 

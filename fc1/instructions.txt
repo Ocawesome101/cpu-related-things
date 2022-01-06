@@ -1,0 +1,41 @@
+FC-1
+====
+
+The FC-1 is a general-purpose 16-bit processor supporting 16MB of memory in its 24-bit address space.  It has a 2-ring hardware permissions model, a memory management unit, and a floating-point unit.
+
+There are 8 general-purpose registers.  There are 8 "extended" registers for setting CPU attributes such as virtual memory boundaries, or where the stack is.
+
+There is 1 24-bit memory bus.  There are 2 16-bit generic IO busses.  Events are primarily interrupt-driven.
+
+Instruction Format:
+
+   EXTEND
+    ----|
+OPCODE  | DEST SRC  VALUE (if EXTEND)
+1111111 1 1111 1111 1111111111111111
+
+If EXTEND is 1, then VALUE is present.
+
+INSTRUCTIONS
+---------------
+OPCODEs in the following table have their least significant bit last.
+
+             EXTEND
+              ----|
+MNEMONIC  OPCODE  | DESCRIPTION
+nop       0000000 0 Do nothing
+imm       0000000 1 Load with VALUE
+mov       0000001 0 Copy SRC to DEST
+lod       0000001 1 Load DEST with the value at memory address in register SRC
+bre       0000010 
+
+ATTRIBUTE REGISTERS
+-----------------------
+0 | 
+1 | 
+2 | 
+3 | 
+4 | 
+5 | 
+6 | 
+7 | 
