@@ -1,18 +1,18 @@
 FC-1
 ====
 
-The FC-1 is a general-purpose 16-bit processor supporting 16MB of memory in its 24-bit address space.  It has a 2-ring hardware permissions model, a memory management unit, and a floating-point unit.
+The FC-1 is a general-purpose 24-bit processor supporting up to 16MB of memory.  It has a memory management unit and a fixed-point coprocessor (for 16-bit.8-bit decimal numbers).
 
-There are 8 general-purpose registers.  There are 8 "extended" registers for setting CPU attributes such as virtual memory boundaries, or where the stack is.
+There are 12 general-purpose, 24-bit registers.  There are 8 "extended" registers for setting CPU attributes such as virtual memory boundaries, or where the stack is.
 
-There is 1 24-bit memory bus.  There are 2 16-bit generic IO busses.  Events are primarily interrupt-driven.
+There is 1 24-bit memory bus.  There are 2 12-bit generic IO busses.  Events are primarily interrupt-driven.  Memory-mapped IO is supported.
 
 Instruction Format:
 
    EXTEND
     ----|
-OPCODE  | DEST SRC  VALUE (if EXTEND)
-1111111 1 1111 1111 1111111111111111
+OPCODE  | DEST SRC  VALUE(if EXTEND)
+1111111 1 1111 1111 111111111111111111111111
 
 If EXTEND is 1, then VALUE is present.
 
@@ -23,19 +23,57 @@ OPCODEs in the following table have their least significant bit last.
              EXTEND
               ----|
 MNEMONIC  OPCODE  | DESCRIPTION
-nop       0000000 0 Do nothing
-imm       0000000 1 Load with VALUE
-mov       0000001 0 Copy SRC to DEST
-lod       0000001 1 Load DEST with the value at memory address in register SRC
-bre       0000010 
+nop       0000000 * Do nothing
+== General-purpose ==
+idload    0000001 0 Load DEST with the value at the memory address stored in SRC
+load      0000001 1 Load DEST with the value at memory address VALUE
+move      0000010 0 Copy SRC to DEST
+imm       0000010 1 Load SRC with VALUE
+idstore   0000011 0 Store the value in SRC at the memory address in DEST
+store     0000011 1 Store the value in SRC at the memory address VALUE
+== Flow control ==
+compare   0000100 0 Compare SRC to DEST, and store the result in A4
+jump      0000100 1 If A4 == SRC, jump to VALUE
+idjump    0000101 0 If A4 == SRC, jump to the address stored in DEST
+rjump     0000101 1 If A4 == SRC, jump to relative offset VALUE
+== Numerical operations ==
+== Interrupts ==
+seti      1111110 0 Enable interrupts
+clri      1111111 0 Disable interrupts
 
 ATTRIBUTE REGISTERS
 -----------------------
-0 | 
-1 | 
-2 | 
-3 | 
-4 | 
-5 | 
-6 | 
-7 | 
+A0 | Program counter
+A1 | Stack root pointer
+A2 | Current stack index pointer
+A3 | Pointer to the in-memory segment descriptor table (see below)
+A4 | Pointer to the interrupt vector table
+A5 | Result of the 'compare' instruction (flag register)
+A6 | 
+A7 | 
+
+SEGMENT DESCRIPTOR TABLE
+---------------------------
+The Segment Descriptor Table provides descriptions of memory segments.  Its layout in memory is:
+
+4 bytes: length in bytes
+<entries>
+  For each entry:
+  4 bytes: start address
+  4 bytes: end address
+
+INTERRUPT DESCRIPTOR TABLE
+----------------------------
+INTERRUPTS:
+IRQ  MEANING
+00  TIMER - Internal timer
+01  IODVC - I/O device
+02  FAULT - Fault
+03  NSJMP - Jump to new segment
+04  
+05  
+06  
+07  
+08  
+
+The Interrupt Descriptor Table is a set of 8 4-byte interrupt vector pointers.
