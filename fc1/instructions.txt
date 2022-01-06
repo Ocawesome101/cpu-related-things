@@ -1,11 +1,9 @@
 FC-1
 ====
 
-The FC-1 is a general-purpose 24-bit processor supporting up to 16MB of memory.  It has a memory management unit and a fixed-point coprocessor (for 16-bit.8-bit decimal numbers).
+The FC-1 is a general-purpose 24-bit processor supporting up to 16MB of memory.  There are 10 general-purpose, 24-bit registers.  There are 6 "attribute" registers for setting CPU attributes such as where the stack is.
 
-There are 10 general-purpose, 24-bit registers.  There are 8 "extended" registers for setting CPU attributes such as where the stack is.
-
-There is 1 24-bit memory bus.  There are 2 12-bit generic IO busses.  Events are primarily interrupt-driven.  Memory-mapped IO is supported.
+There is 1 24-bit memory bus.  There are 6 generic 16-bit IO busses.  Events are primarily interrupt-driven.  Memory-mapped IO is supported.
 
 Instruction Format:
 
@@ -18,7 +16,7 @@ If EXTEND is 1, then VALUE is present.
 
 INSTRUCTIONS
 ---------------
-OPCODEs in the following table have their least significant bit last.
+OPCODEs in the following table are MSB-first.
 
              EXTEND
               ----|
@@ -57,9 +55,26 @@ or        0001110 0 DEST |= SRC
 ori       0001110 1 DEST |= VALUE
 xor       0001111 0 DEST ~= SRC
 xori      0001111 1 DEST ~= VALUE
+== Port I/O ==
+pread     0010000 1 Read into DEST, with extra parameters in VALUE (below)
+pwrite    0010001 1 Write from SRC to port, extra parameters in VALUE:
+    bit | meaning
+   0..2 | select port (0-5)
+      3 | if 0, read/write 1 byte; if 1, read/write 2 bytes
+      4 | write:
+            if 0, really do write from SRC; otherwise write from final 16 bits
+            of VALUE
+          read:
+            if 0, really do read to DEST; otherwise read and discard
+      5 | unused
+      6 | unused
+      7 | unused
+  8..23 | data
 == Interrupts ==
-seti      1111110 0 Enable interrupts
-clri      1111111 0 Disable interrupts
+seti      1111101 0 Enable interrupts
+irq       1111101 1 Send interrupt VALUE (parameters SRC and DEST)
+clri      1111110 0 Disable interrupts
+halt      1111111 0 Wait for an interrupt
 
 ATTRIBUTE REGISTERS
 -----------------------
@@ -71,13 +86,13 @@ A3 | Pointer to the in-memory segment descriptor table (see below)
 A4 | Pointer to the interrupt vector table
 A5 | Result of the 'compare' instruction (flag register)
     bitmap:
-             0 | carry
-             1 | greater
-             2 | less
-             3 | equal
-             4 | positive
-             5 | negative
-         6..23 | unused, always 0
+        0 | carry
+        1 | greater
+        2 | less
+        3 | equal
+        4 | positive
+        5 | negative
+    6..23 | unused, always 0
 
 SEGMENT DESCRIPTOR TABLE
 ---------------------------
