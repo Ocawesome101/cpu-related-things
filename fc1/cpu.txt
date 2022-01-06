@@ -29,35 +29,38 @@ move      0000010 0 Copy SRC to DEST
 imm       0000010 1 Load SRC with VALUE
 idstore   0000011 0 Store the value in SRC at the memory address in DEST
 store     0000011 1 Store the value in SRC at the memory address VALUE
+push      0000100 0 Push SRC onto the stack
+pushi     0000100 1 Push VALUE onto the stack
+pop       0000101 0 Pop from the stack into DEST
 == Flow control ==
-compare   0000100 0 Compare SRC to DEST, and store the result in A4
-jump      0000100 1 If A4 == SRC, jump to VALUE
-idjump    0000101 0 If A4 == SRC, jump to the address stored in DEST
-rjump     0000101 1 If A4 == SRC, jump to relative offset VALUE
+compare   0000110 0 Compare SRC to DEST, and store the result in A4
+jump      0000110 1 If A4 == SRC, jump to VALUE
+idjump    0000111 0 If A4 == SRC, jump to the address stored in DEST
+rjump     0000111 1 If A4 == SRC, jump to relative offset VALUE
 == Integer operations ==
-add       0000110 0 DEST += SRC
-addi      0000110 1 DEST += VALUE
-sub       0000111 0 DEST -= SRC
-subi      0000111 1 DEST -= VALUE
-mult      0001000 0 DEST *= SRC
-multi     0001000 1 DEST *= VALUE
-div       0001001 0 DEST /= SRC
-divi      0001001 1 DEST /= VALUE
-lshift    0001010 0 DEST <<= SRC
-lshifti   0001010 1 DEST <<= VALUE
-rshift    0001011 0 DEST >>= SRC
-rshifti   0001011 1 DEST >>= VALUE
-not       0001100 0 DEST not= DEST
---------- 0001100 1 illegal instruction
-and       0001101 0 DEST &= SRC
-andi      0001101 1 DEST &= VALUE
-or        0001110 0 DEST |= SRC
-ori       0001110 1 DEST |= VALUE
-xor       0001111 0 DEST ~= SRC
-xori      0001111 1 DEST ~= VALUE
+add       0001000 0 DEST += SRC
+addi      0001000 1 DEST += VALUE
+sub       0001001 0 DEST -= SRC
+subi      0001001 1 DEST -= VALUE
+mult      0001010 0 DEST *= SRC
+multi     0001010 1 DEST *= VALUE
+div       0001011 0 DEST /= SRC
+divi      0001011 1 DEST /= VALUE
+lshift    0001100 0 DEST <<= SRC
+lshifti   0001100 1 DEST <<= VALUE
+rshift    0001101 0 DEST >>= SRC
+rshifti   0001101 1 DEST >>= VALUE
+not       0001110 0 DEST not= DEST
+--------- 0001110 1 illegal instruction
+and       0001111 0 DEST &= SRC
+andi      0001111 1 DEST &= VALUE
+or        0010000 0 DEST |= SRC
+ori       0010000 1 DEST |= VALUE
+xor       0010001 0 DEST ~= SRC
+xori      0010001 1 DEST ~= VALUE
 == Port I/O ==
-pread     0010000 1 Read into DEST, with extra parameters in VALUE (below)
-pwrite    0010001 1 Write from SRC to port, extra parameters in VALUE:
+pread     0010010 1 Read into DEST, with extra parameters in VALUE (below)
+pwrite    0010011 1 Write from SRC to port, extra parameters in VALUE:
     bit | meaning
    0..2 | select port (0-5)
       3 | if 0, read/write 1 byte; if 1, read/write 2 bytes
@@ -98,24 +101,42 @@ SEGMENT DESCRIPTOR TABLE
 ---------------------------
 The Segment Descriptor Table provides descriptions of memory segments.  Its layout in memory is:
 
-4 bytes: length in bytes
+2 bytes: length in bytes
 <entries>
   For each entry:
-  4 bytes: start address
-  4 bytes: end address
+  1 byte: flags
+    0 | stack segment
+    1 | protected (fire NSJMP on entry)
+    2 |
+  3 bytes: start address
+  3 bytes: end address
 
 INTERRUPT DESCRIPTOR TABLE
 ----------------------------
 INTERRUPTS:
 IRQ  MEANING
 00  TIMER - Internal timer
-01  IODVC - I/O device
+01  IODVC - I/O device interrupt
 02  FAULT - Fault
 03  NSJMP - Jump to new segment
-04  
-05  
-06  
-07  
-08  
+04  --
+05  --
+06  --
+07  SFIRQ - Software interrupt
 
+Type 7 should be used for system calls
+
+Interrupts will always place their parameters onto the stack.
 The Interrupt Descriptor Table is a set of 8 4-byte interrupt vector pointers.
+
+I/O
+-----
+Here are some standard memory-mapped I/O devices:
+  - an 80x25 text screen from 0x200; in exactly the same format as the VGA framebuffer
+
+Here are some standard port devices:
+  - A keyboard (device ID 1)
+  - A serial console (device ID 2)
+  - A storage device (device ID 5)
+
+All port devices MUST support returning a two-byte device identifier when they are given the value 0100011101001001 (0x4749).  Otherwise communication protocols are per-device.
