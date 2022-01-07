@@ -15,13 +15,6 @@
 #include "mmio.h"
 #include "ports.h"
 
-int main() {
-  emulator_init();
-  emulator_load_bios();
-  // TODO: load custom ports and IO and whatnot with dlopen()/dlsym()
-  return 0;
-}
-
 int emulator_init() {
   registers_init();
   memory_init();
@@ -47,3 +40,11 @@ int emulator_load_bios() {
 int emulator_halt() {
   return 0;
 }
+
+int main() {
+  emulator_init();
+  emulator_load_bios();
+  // TODO: load custom ports and IO and whatnot with dlopen()/dlsym()
+  return 0;
+}
+

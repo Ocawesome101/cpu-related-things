@@ -9,7 +9,7 @@
 #include "instructions.h"
 #include "emulator.h"
 
-int instructions_execute(char code, char src, char dest, int value) {
+int instructions_execute(unsigned char code, char src, char dest, int value) {
   int tmp;
   switch (code) {
     case INST_NOP:
@@ -212,7 +212,7 @@ int instructions_execute(char code, char src, char dest, int value) {
 // read and execute one instruction
 int instructions_read_and_execute() {
   int pc = registers_get(REG_PC);
-  char code = (char)memory_read(pc++, 1);
+  unsigned char code = (unsigned char)memory_read(pc++, 1);
   char srcdest = (char)memory_read(pc++, 1);
   char src = (srcdest & 0xF0) >> 4;
   char dest = srcdest & 0x0F;
