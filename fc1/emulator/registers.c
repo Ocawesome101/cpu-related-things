@@ -14,6 +14,6 @@ int registers_get(char id) {
 }
 
 int registers_set(char id, int value) {
-  registers[id] = value;
+  registers[id] = value & 0xFFFFFF;
   return 0;
 }

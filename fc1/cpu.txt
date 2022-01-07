@@ -21,12 +21,13 @@ OPCODEs in the following table are MSB-first.
              EXTEND
               ----|
 MNEMONIC  OPCODE  | DESCRIPTION
-nop       0000000 * Do nothing
+nop       0000000 0 Do nothing
+--------- 0000000 1 Illegal instruction
 == General-purpose ==
 idload    0000001 0 Load DEST with the value at the memory address stored in SRC
 load      0000001 1 Load DEST with the value at memory address VALUE
 move      0000010 0 Copy SRC to DEST
-imm       0000010 1 Load SRC with VALUE
+imm       0000010 1 Load DEST with VALUE
 idstore   0000011 0 Store the value in SRC at the memory address in DEST
 store     0000011 1 Store the value in SRC at the memory address VALUE
 push      0000100 0 Push SRC onto the stack
@@ -93,9 +94,7 @@ A5 | Result of the 'compare' instruction (flag register)
         1 | greater
         2 | less
         3 | equal
-        4 | positive
-        5 | negative
-    6..23 | unused, always 0
+    4..23 | unused, always 0
 
 SEGMENT DESCRIPTOR TABLE
 ---------------------------
