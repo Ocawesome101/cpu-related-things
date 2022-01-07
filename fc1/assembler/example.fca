@@ -1,0 +1,89 @@
+; this is an example of FC-1 assembly
+
+; this program expects to be run as BIOS, which is loaded to 0x4000
+#offset 0x4000
+
+; set up an interrupt vector table
+imm a4, .ivt
+
+; print text pointed to by r0
+.print
+  imm r2, 0
+  imm r3, 4
+  .printloop
+    idload r0, r1
+    ; assume the serial port is port 2
+    ; data, port, 1 or 2 bytes, write from SRC or from immediate
+    pwrite r1, 2, 0, 0
+    compare r1, r2
+    addi r0, 1
+    jump r3, .printloop
+  pop r0
+  idjump a5, r0
+
+.isr_ret
+  pop r0
+  idjump a5, r0
+
+.timer
+  imm r0, .text_timer
+  push .isr_ret
+  jump a5, .print
+
+.iodvc
+  imm r0, .text_iodvc
+  push .isr_ret
+  jump a5, .print
+
+.nsjmp
+  imm r0, .text_nsjmp
+  push .isr_ret
+  jump a5, .print
+
+.doublefault
+  imm r0, .text_doublefault
+  push .isr_ret
+  jump a5, .print
+
+.stackoverflow
+  imm r0, .text_stackoverflow
+  push .isr_ret
+  jump a5, .print
+
+.segfault
+  imm r0, .text_segfault
+  push .isr_ret
+  jump a5, .print
+
+.illegal
+  imm r0, .text_illegal
+  push .isr_ret
+  jump a5, .print
+
+.ivt
+#dw .timer
+#dw .iodvc
+#dw .nsjmp
+#dw .generalfault
+#dw .doublefault
+#dw 0
+#dw .stackoverflow
+#dw .segfault
+#dw .illegal
+
+.text_timer
+#dw "Got timer\n" 0
+.text_iodvc
+#dw "I/O device interrupt\n" 0
+.text_nsjmp
+#dw "Jump to protected segment\n" 0
+.text_generalfault
+#dw "!!Unhandled interrupt!!\n" 0
+.text_doublefault
+#dw "!!DOUBLE FAULT!!\n" 0
+.text_stackoverflow
+#dw "!!STACK OVERFLOW!!\n" 0
+.text_segfault
+#dw "Segmentation fault\n" 0
+.text_illegal
+#dw "Illegal instruction\n" 0

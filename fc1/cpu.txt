@@ -34,7 +34,7 @@ push      0000100 0 Push SRC onto the stack
 pushi     0000100 1 Push VALUE onto the stack
 pop       0000101 0 Pop from the stack into DEST
 == Flow control ==
-compare   0000110 0 Compare SRC to DEST, and store the result in A4
+compare   0000110 0 Compare SRC to DEST, and store the result in A5
 jump      0000110 1 If A5 == SRC, jump to VALUE
 idjump    0000111 0 If A5 == SRC, jump to the address stored in DEST
 rjump     0000111 1 If A5 == SRC, jump to relative offset VALUE
@@ -60,6 +60,7 @@ ori       0010000 1 DEST |= VALUE
 xor       0010001 0 DEST ~= SRC
 xori      0010001 1 DEST ~= VALUE
 == Port I/O ==
+devid     0010010 0 Request the device ID of the device attached to the port stored in the SRC register
 pread     0010010 1 Read into DEST, with extra parameters in VALUE (below)
 pwrite    0010011 1 Write from SRC to port, extra parameters in VALUE:
     bit | meaning
@@ -121,10 +122,9 @@ IRQ  MEANING
 06 STKOVERF  Stack overflow (stack exceeded segment boundaries)
 07 SEGFAULT  Segmentation fault (attempt to jump to a protected or NOJUMP segment)
 08 ILGLINST  Illegal instruction
-255  SFIRQ - Software interrupt    - no parameters
+9-15       - reserved for future ISA revisions
+16  SFIRQ  - Software interrupt   - no parameters
 
-
-FAULTCODE   MEANING
 
 Interrupts will always place their parameters onto the stack, preceded by the previous program counter location.  Thus, to return from an interrupt handler after removing its arguments from the stack, the following code should suffice:
 
@@ -143,4 +143,4 @@ Here are some standard port devices:
   - A serial console (device ID 2)
   - A storage device (device ID 5)
 
-All port devices MUST support returning a two-byte device identifier when they are given the value 0100011101001001 (0x4749).  Otherwise communication protocols are per-device.
+All port devices must return a device ID when they are requested to do so.

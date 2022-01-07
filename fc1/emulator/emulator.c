@@ -28,7 +28,7 @@ int emulator_init() {
 int emulator_load_bios() {
   int fd = open("bios.bin", O_RDONLY);
   if (fd == -1) {
-    err(errno, "cannot open bios: ");
+    err(errno, "cannot load bios");
   }
   char buffer[8192];
   int size = read(fd, &buffer, 8192);
