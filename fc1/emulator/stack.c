@@ -2,7 +2,10 @@
 #include "registers.h"
 #include "stack.h"
 
-void stack_init() {}
+// default stack at 0x3000
+void stack_init() {
+  registers_set(REG_SR, 0x3000);
+}
 
 int stack_push(int value) {
   int stackroot = registers_get(REG_SR);

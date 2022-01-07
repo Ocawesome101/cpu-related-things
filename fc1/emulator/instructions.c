@@ -6,27 +6,11 @@
 #include "cmpflags.h"
 #include "stack.h"
 #include "interrupts.h"
-
-// read and execute one instruction
-int instructions_read_and_execute() {
-  int pc = registers_get(REG_PC);
-  char code = (char)memory_read(pc++, 1);
-  char srcdest = (char)memory_read(pc++, 1);
-  char src = (srcdest & 0xF0) >> 4;
-  char dest = srcdest & 0x0F;
-  int value = 0;
-  if (code & 0x1 == 0x1) {
-    value = memory_read(pc, 3);
-    pc += 3;
-  }
-
-  int result = instructions_execute(code, src, dest, value);
-  if (result == 0)
-    registers_set(REG_PC, pc);
-  return 0;
-}
+#include "instructions.h"
+#include "emulator.h"
 
 int instructions_execute(char code, char src, char dest, int value) {
+  int tmp;
   switch (code) {
     case INST_NOP:
       break;
@@ -40,11 +24,11 @@ int instructions_execute(char code, char src, char dest, int value) {
       break;
     
     case INST_MOVE:
-      registers.set(dest, registers.get(src));
+      registers_set(dest, registers_get(src));
       break;
     
     case INST_IMM:
-      registers.set(dest, value);
+      registers_set(dest, value);
       break;
     
     case INST_IDSTORE:
@@ -82,18 +66,24 @@ int instructions_execute(char code, char src, char dest, int value) {
       break;
     
     case INST_JUMP:
-      if (registers_get(REG_CMP) == registers_get(src))
+      if (registers_get(REG_CMP) == registers_get(src)) {
         registers_set(REG_PC, value);
+        return -1;
+      }
       break;
     
     case INST_IDJUMP:
-      if (registers_get(REG_CMP) == registers_get(src))
+      if (registers_get(REG_CMP) == registers_get(src)) {
         registers_set(REG_PC, registers_get(dest));
+        return -1;
+      }
       break;
 
     case INST_RJUMP:
-      if (registers_get(REG_CMP) == registers_get(src))
+      if (registers_get(REG_CMP) == registers_get(src)) {
         registers_set(REG_PC, registers_get(REG_PC) + value);
+        return -1;
+      }
       break;
 
     case INST_ADD:
@@ -104,21 +94,21 @@ int instructions_execute(char code, char src, char dest, int value) {
       break;
 
     case INST_ADDI:
-      int tmp = registers_get(dest) + value;
+      tmp = registers_get(dest) + value;
       if (tmp > 0xFFFFFF)
         registers_set(REG_CMP, CMPFLAGS_OVERFLOW);
       registers_set(dest, tmp);
       break;
 
     case INST_SUB:
-      int tmp = registers_get(dest) - registers_get(src);
+      tmp = registers_get(dest) - registers_get(src);
       if (tmp < 0)
         registers_set(REG_CMP, CMPFLAGS_UNDERFLOW);
       registers_set(dest, tmp);
       break;
 
     case INST_SUBI:
-      int tmp = registers_get(dest) - value;
+      tmp = registers_get(dest) - value;
       if (tmp < 0)
         registers_set(REG_CMP, CMPFLAGS_UNDERFLOW);
       registers_set(dest, tmp);
@@ -177,14 +167,18 @@ int instructions_execute(char code, char src, char dest, int value) {
       break;
 
     case INST_XOR:
-      registers_set(dest, registers_get(dest) ~ registers_get(src));
+      registers_set(dest, registers_get(dest) ^ registers_get(src));
       break;
 
     case INST_XORI:
-      registers_set(dest, registers_get(dest) ~ value);
+      registers_set(dest, registers_get(dest) ^ value);
       break;
 
     case INST_PREAD:
+      char port = value & PORT_FLAG_PSEL;
+      int nbytes = 1 + ((1 * (value & PORT_FLAG_NBYTE)) >> 3);
+      int reallyread = (value & PORT_FLAG_USEREG) != 0;
+
       
       break;
 
@@ -192,21 +186,44 @@ int instructions_execute(char code, char src, char dest, int value) {
       break;
 
     case INST_SETI:
+      interrupts_set(1);
       break;
 
     case INST_IRQ:
-      break;
+      interrupts_fire(value, -1, -1);
+      return -1;
 
     case INST_CLRI:
+      interrupts_set(0);
       break;
 
     case INST_HALT:
+      emulator_halt();
       break;
     
     default:
-      interrupts_fire(INT_FAULT, FAULT_ILGLINST, -1);
+      interrupts_fire(INT_ILGLINST, -1, -1);
       return -1;
   }
 
+  return 0;
+}
+
+// read and execute one instruction
+int instructions_read_and_execute() {
+  int pc = registers_get(REG_PC);
+  char code = (char)memory_read(pc++, 1);
+  char srcdest = (char)memory_read(pc++, 1);
+  char src = (srcdest & 0xF0) >> 4;
+  char dest = srcdest & 0x0F;
+  int value = 0;
+  if (code & 0x1 == 0x1) {
+    value = memory_read(pc, 3);
+    pc += 3;
+  }
+
+  int result = instructions_execute(code, src, dest, value);
+  if (result == 0)
+    registers_set(REG_PC, pc);
   return 0;
 }

@@ -53,4 +53,7 @@
 // skip one
 #define INST_HALT     254
 
+int instructions_read_and_execute();
+int instructions_execute(char code, char src, char dest, int value);
+
 #endif

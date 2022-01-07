@@ -4,7 +4,19 @@
 #include "memory.h"
 #include "registers.h"
 
-void sdt_init() {}
+/*
+ * default SDT located at 0x2000:
+ *  - 4k stack at 0x3000, with NOJUMP
+ *  - rest open, unrestricted
+ * the bios code starts at 0x4000
+ */
+void sdt_init() {
+  registers_set(REG_SDT, 0x2000);
+  memory_write(0x2000, 2, 2);
+  memory_write(0x2002, SDT_FLAG_NOJUMP, 1);
+  memory_write(0x2003, 0x3000, 2);
+  memory_write(0x2006, 0x3FFF, 2);
+}
 
 int sdt_read_table(sdt_State* state) {
   int sdt_address = memory_read(registers_get(REG_SDT), 3);

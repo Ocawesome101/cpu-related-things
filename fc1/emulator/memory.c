@@ -39,3 +39,11 @@ int memory_write(int address, int value, int length) {
   }
   return 0;
 }
+
+// currently mostly used by the bios loading code
+int memory_writes(int address, char* buffer, int length) {
+  for (int i = 0; i < length; i++) {
+    memory[address + i] = buffer[i];
+  }
+  return 0;
+}

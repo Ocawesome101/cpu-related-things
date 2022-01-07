@@ -76,7 +76,7 @@ pwrite    0010011 1 Write from SRC to port, extra parameters in VALUE:
   8..23 | data
 == Interrupts ==
 seti      1111101 0 Enable interrupts
-irq       1111101 1 Send interrupt VALUE (parameters SRC and DEST)
+irq       1111101 1 Send interrupt VALUE
 clri      1111110 0 Disable interrupts
 halt      1111111 0 Wait for an interrupt
 
@@ -115,22 +115,18 @@ INTERRUPTS:
 IRQ  MEANING
 00   TIMER - Internal timer       - no parameters
 01   IODVC - I/O device interrupt - two parameters (DEVID, REQID)
-02   FAULT - Fault                - one parameter (FAULTCODE, see table below)
 03   NSJMP - Jump to new segment  - one parameter (SEGMENTID, index into SDT)
-4-7          Reserved for future ISA revisions 
-8-255 SFIRQ- Software interrupt    - no parameters
+04 DBLFAULT  Double fault (unhandled interrupt)
+05 TRPFAULT  Triple fault (uncaught double fault, hard resets)
+06 STKOVERF  Stack overflow (stack exceeded segment boundaries)
+07 SEGFAULT  Segmentation fault (attempt to jump to a protected or NOJUMP segment)
+08 ILGLINST  Illegal instruction
+255  SFIRQ - Software interrupt    - no parameters
 
-Type 7 should be used for system calls.
 
 FAULTCODE   MEANING
-00 GENFAULT General fault
-01 DBLFAULT Double fault
-02 TRPFAULT Triple fault
-03 STKOVERF Stack overflow
-04 SEGFAULT Segmentation fault
-05 ILGLINST Illegal instruction
 
-Interrupts will always place their parameters onto the stack, preceded by the previous program counter location.  Thus, to return from an interrupt handler, the following code should suffice:
+Interrupts will always place their parameters onto the stack, preceded by the previous program counter location.  Thus, to return from an interrupt handler after removing its arguments from the stack, the following code should suffice:
 
   pop r0
   idjump a5, r0

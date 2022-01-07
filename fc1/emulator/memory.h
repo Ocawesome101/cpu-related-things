@@ -7,5 +7,6 @@ int memory_init();
 int memory_read(int address, int length);
 int memory_reads(int address, int length, char* buffer);
 int memory_write(int address, int value, int length);
+int memory_writes(int address, char* buffer, int length);
 
 #endif

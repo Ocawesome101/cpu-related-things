@@ -3,17 +3,18 @@
 
 #define INT_TIMER 0
 #define INT_IODVC 1
-#define INT_FAULT 2
-#define INT_NSJMP 3
+#define INT_NSJMP 2
 
-#define FAULT_GENFAULT 0
-#define FAULT_DBLFAULT 1
-#define FAULT_TRPFAULT 2
-#define FAULT_STKOVERF 3
-#define FAULT_SEGFAULT 4
-#define FAULT_ILGLINST 5
+// faults
+#define INT_GENFAULT 3
+#define INT_DBLFAULT 4
+#define INT_TRPFAULT 5
+#define INT_STKOVERF 6
+#define INT_SEGFAULT 7
+#define INT_ILGLINST 8
 
 void interrupts_init();
 int interrupts_fire(int code, int par1, int par2);
+int interrupts_set(int enable);
 
 #endif
