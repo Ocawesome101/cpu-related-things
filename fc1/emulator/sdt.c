@@ -1,6 +1,6 @@
 // segment descriptor table
 
-#include "segdesctable.h"
+#include "sdt.h"
 #include "memory.h"
 #include "registers.h"
 
@@ -34,7 +34,7 @@ int sdt_get_segment(sdt_Entry* retentry, int address) {
   sdt_read_table(&state);
   // loop through SDT entries until we find the one containing this address
   sdt_Entry entry;
-  while(sdt_read_entry(&state, &entry) == 0) {
+  while (sdt_read_entry(&state, &entry) == 0) {
     if (address >= entry.start && address <= entry.end) {
       retentry->index = entry.index;
       retentry->flags = entry.flags;

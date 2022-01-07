@@ -2,6 +2,7 @@
 #define sdt_h
 
 #define SDT_FLAG_PROTECT  0x1
+#define SDT_FLAG_NOJUMP   0x2
 
 typedef struct sdt_entry {
   char index;

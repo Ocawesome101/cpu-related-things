@@ -34,9 +34,9 @@ pushi     0000100 1 Push VALUE onto the stack
 pop       0000101 0 Pop from the stack into DEST
 == Flow control ==
 compare   0000110 0 Compare SRC to DEST, and store the result in A4
-jump      0000110 1 If A4 == SRC, jump to VALUE
-idjump    0000111 0 If A4 == SRC, jump to the address stored in DEST
-rjump     0000111 1 If A4 == SRC, jump to relative offset VALUE
+jump      0000110 1 If A5 == SRC, jump to VALUE
+idjump    0000111 0 If A5 == SRC, jump to the address stored in DEST
+rjump     0000111 1 If A5 == SRC, jump to relative offset VALUE
 == Integer operations ==
 add       0001000 0 DEST += SRC
 addi      0001000 1 DEST += VALUE
@@ -101,13 +101,12 @@ SEGMENT DESCRIPTOR TABLE
 ---------------------------
 The Segment Descriptor Table provides descriptions of memory segments.  Its layout in memory is:
 
-2 bytes: length in bytes
+1 byte: length in entries
 <entries>
   For each entry:
   1 byte: flags
-    0 | stack segment
-    1 | protected (fire NSJMP on entry)
-    2 |
+    0 | protected (fire NSJMP on entry)
+    1 | can jump (otherwise fire SEGFAULT)
   3 bytes: start address
   3 bytes: end address
 
@@ -115,18 +114,28 @@ INTERRUPT DESCRIPTOR TABLE
 ----------------------------
 INTERRUPTS:
 IRQ  MEANING
-00  TIMER - Internal timer
-01  IODVC - I/O device interrupt
-02  FAULT - Fault
-03  NSJMP - Jump to new segment
-04  --
-05  --
-06  --
-07  SFIRQ - Software interrupt
+00   TIMER - Internal timer       - no parameters
+01   IODVC - I/O device interrupt - two parameters (DEVID, REQID)
+02   FAULT - Fault                - one parameter (FAULTCODE, see table below)
+03   NSJMP - Jump to new segment  - one parameter (SEGMENTID, index into SDT)
+4-7          Reserved for future ISA revisions 
+8-255 SFIRQ- Software interrupt    - no parameters
 
-Type 7 should be used for system calls
+Type 7 should be used for system calls.
 
-Interrupts will always place their parameters onto the stack.
+FAULTCODE   MEANING
+00 GENFAULT General fault
+01 DBLFAULT Double fault
+02 TRPFAULT Triple fault
+03 STKOVERF Stack overflow
+04 SEGFAULT Segmentation fault
+05 ILGLINST Illegal instruction
+
+Interrupts will always place their parameters onto the stack, preceded by the previous program counter location.  Thus, to return from an interrupt handler, the following code should suffice:
+
+  pop r0
+  idjump a5, r0
+
 The Interrupt Descriptor Table is a set of 8 4-byte interrupt vector pointers.
 
 I/O
