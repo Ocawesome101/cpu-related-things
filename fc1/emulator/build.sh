@@ -2,13 +2,17 @@
 
 set -e
 
-cd emusrc
-gcc *.c -I../include -ldl -o emulator
+rm -rf ports && mkdir ports
 
-cd ../portsrc
+basedir=$PWD
+
+cd src
+gcc *.c -I$basedir/include -ldl -o $basedir/fc1
+
+cd ports
 
 for f in $(ls); do
-  gcc "$f" -I../include -shared -fPIC -o ${f%.c}.o
+  gcc "$f" -I$basedir/include -shared -fPIC -o $basedir/ports/${f%.c}.o
 done
 
-cd ..
+cd ../..

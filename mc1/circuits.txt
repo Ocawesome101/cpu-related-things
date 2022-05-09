@@ -1,0 +1,30 @@
+Some circuit layouts.
+
+General syntax:
+  [input,input,...]=>C defines the inputs to a circuit C
+  C=>[output] defines the outputs of a circuit C
+  -> denotes a connection
+  => denotes multiple connections
+  Cˣ = x occurrences of circuit C
+  Nₕ = high bits of N
+  Nₗ = low bits of N
+  Nₓ = N is x bits
+  example:
+    [I1₄,I2₈]=>C1->[O1]
+      inputs I1 and I2 are passed to circuit C1, the output of which is
+      assigned to O1.  I1 is 4 bits and I2 is 8.
+
+    C1=>(C2=>C3ˣ)ʸ
+      each output of C1 leads into an instance of C2, and each output of that
+      leads into x instances of C3.
+
+D = [I₄]=>#=>[16 outputs]
+  4-bit decoder
+
+M = [RW₁,V₈]=>#=>[O₈]
+  single-byte memory cell.  if RW is 1 then writes, else reads
+
+MC = [I₈,W₁,V₈]=>D[Iₕ]=>(D[Iₗ]=>M[W₁,V₁]¹⁶)¹⁶=>[OP₈]
+  very simple memory addressing circuit.  if W₁ is provided, writes, else reads.  Address is I₈.
+
+
