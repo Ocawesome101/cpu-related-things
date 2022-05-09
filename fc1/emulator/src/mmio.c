@@ -30,8 +30,10 @@ int mmio_getrange(mmio_Range* range) {
   // disallow overlapping devices
   mmio_Device dummy;
   int total = mmio_find(&dummy, range->start) + mmio_find(&dummy, range->end);
-  if (total != 2)
+  if (total != 2) {
     return -1;
+  }
+
   // TODO: might need to find a different way of doing this
   range->data = memdata + range->start;
   return 0;

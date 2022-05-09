@@ -1,33 +1,34 @@
 #include "ports.h"
 #include "interrupts.h"
-#include <dlfcn.h>
-#include <dirent.h>
-#include <err.h>
-#include <errno.h>
-#include <string.h>
 #include <stdio.h>
+#include <err.h>
 
-void load_port(char* file) {
-  char fullname[256+sizeof(PORT_SCAN_DIR)] = PORT_SCAN_DIR;
-  strcpy(&fullname+sizeof(PORT_SCAN_DIR)+1, file);
+struct Port ports[6];
+
+void port_register_device(char id, port_reader reader, port_writer writer,
+    port_isready isready) {
+  if (ports[id].registered != 0) {
+    errx(1, "[emulator] attempt to double-register port %c", id);
+  }
+
+  ports[id].registered = 1;
+  ports[id].read = reader;
+  ports[id].write = writer;
+  ports[id].isready = isready;
+
+  printf("[emulator] device registered on port %c\n", id);
 }
 
 void ports_init() {
-  // load ports from PORT_SCAN_DIR using dlopen()/dlsym() magic
-  struct dirent* dent;
-  DIR* dirfd;
-  if ((dirfd = opendir(PORT_SCAN_DIR)) == NULL) {
-    err(1, "could not open %s", PORT_SCAN_DIR);
+  for (int i = 0; i < 6; i++) {
+    ports[i].registered = 0;
+    ports[i].id = i;
   }
-
-  while ((dent = readdir(dirfd)) != NULL) {
-    printf("[emulator] loading port from %s/%s\n", PORT_SCAN_DIR, dent->d_name);
-    load_port(dent->d_name);
-  }
-  closedir(dirfd);
 }
 
 unsigned char port_read(char port) {
+  if (port > 5 || ports[port].registered == 0) {
+  }
 }
 
 unsigned short port_read2(char port) {

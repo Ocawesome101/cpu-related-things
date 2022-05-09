@@ -37,6 +37,7 @@ int memory_write(int address, int value, int length) {
     memory[address + i] = value & 0xFF;
     value >>= 8;
   }
+  mmio_update();
   return 0;
 }
 

@@ -1,5 +1,5 @@
 // FC-1 emulator
-// Compile with "gcc emusrc/*.c -ldl -o emulator"
+// Main source file
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +15,7 @@
 #include "interrupts.h"
 #include "mmio.h"
 #include "ports.h"
+#include "devices.h"
 #include "instructions.h"
 
 #define TIMER_TICKS_PER_SECOND 250 
@@ -29,6 +30,7 @@ int emulator_init() {
   stack_init();
   sdt_init();
   ports_init();
+  devices_init();
   return 0;
 }
 
