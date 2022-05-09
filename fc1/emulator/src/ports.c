@@ -16,7 +16,7 @@ void port_register_device(char id, port_reader reader, port_writer writer,
   ports[id].write = writer;
   ports[id].isready = isready;
 
-  printf("[emulator] device registered on port %c\n", id);
+  printf("[emulator] device registered on port %d\n", id);
 }
 
 void ports_init() {

@@ -24,9 +24,9 @@ void load_device(char* file) {
   device_open = (int (*)(void)) dlsym(dlfd, "device_open");
 
   new = dlerror();
-  dlclose(dlfd);
 
   if (device_open == NULL) {
+    dlclose(dlfd);
     errx(1, "dlsym failed: %s", &fullname, new);
   }
 

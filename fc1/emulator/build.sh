@@ -7,7 +7,7 @@ rm -rf devices && mkdir devices
 basedir=$PWD
 
 cd src
-gcc *.c -I$basedir/include -ldl -o $basedir/fc1 -rdynamic -Wno-incompatible-pointer-types
+gcc *.c -I$basedir/include -ldl -o $basedir/fc1 -Wno-incompatible-pointer-types -rdynamic
 
 cd devices
 
