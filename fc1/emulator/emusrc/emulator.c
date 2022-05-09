@@ -1,5 +1,5 @@
 // FC-1 emulator
-// Compile with "gcc *.c -o emulator"
+// Compile with "gcc emusrc/*.c -ldl -o emulator"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,19 +15,20 @@
 #include "interrupts.h"
 #include "mmio.h"
 #include "ports.h"
+#include "instructions.h"
 
 #define TIMER_TICKS_PER_SECOND 250 
 
 // don't change this
-#define TIMER_TICKS (int)(1/TIMER_TICKS_PER_SECOND)
+#define TIMER_TICKS (int)(1000000000/TIMER_TICKS_PER_SECOND)
 
 int emulator_init() {
   registers_init();
   memory_init();
   interrupts_init();
-  ports_init();
   stack_init();
   sdt_init();
+  ports_init();
   return 0;
 }
 
@@ -41,6 +42,7 @@ int emulator_load_bios() {
   close(fd);
   // copy buffer into memory at 0x4000
   memory_writes(0x4000, &buffer, size);
+  return 0;
 }
 
 int emulator_halt() {
@@ -50,17 +52,23 @@ int emulator_halt() {
 int main() {
   emulator_init();
   emulator_load_bios();
-  // TODO: load custom ports and IO and whatnot with dlopen()/dlsym()
+
+  // timer setup
   struct timespec time_a;
   clock_gettime(CLOCK_MONOTONIC, &time_a);
   struct timespec time_b;
+
   while (1) {
+    // check if we need to fire a timer interrupt
     clock_gettime(CLOCK_MONOTONIC, &time_b);
-    if (time_b.tv_nsec - time_a.tv_nsec) {
-      interrupts_fire(INT_TIMER);
+
+    if ((time_b.tv_nsec - time_a.tv_nsec) > TIMER_TICKS) {
+      interrupts_fire(INT_TIMER, 0, 0);
       time_a.tv_sec = time_b.tv_sec;
       time_a.tv_nsec = time_b.tv_nsec;
     }
+
+    // self explanatory
     instructions_read_and_execute();
   }
   return 0;

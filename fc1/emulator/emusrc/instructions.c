@@ -10,7 +10,8 @@
 #include "emulator.h"
 
 int instructions_execute(unsigned char code, char src, char dest, int value) {
-  int tmp;
+  char port;
+  int tmp, nbytes;
   switch (code) {
     case INST_NOP:
       break;
@@ -87,7 +88,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
       break;
 
     case INST_ADD:
-      int tmp = registers_get(dest) + registers_get(src);
+      tmp = registers_get(dest) + registers_get(src);
       if (tmp > 0xFFFFFF)
         registers_set(REG_CMP, CMPFLAGS_OVERFLOW);
       registers_set(dest, tmp);
@@ -175,14 +176,45 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
       break;
 
     case INST_PREAD:
-      char port = value & PORT_FLAG_PSEL;
-      int nbytes = 1 + ((1 * (value & PORT_FLAG_NBYTE)) >> 3);
+      port = value & PORT_FLAG_PSEL;
+      nbytes = 1 + ((value & PORT_FLAG_NBYTE) >> 3);
       int reallyread = (value & PORT_FLAG_USEREG) != 0;
 
-      
+      int _interim;
+      if (nbytes == 1) {
+        unsigned char input = port_read(port);
+        _interim = (int)input;
+      } else {
+        unsigned short input = port_read2(port);
+        _interim = (int)input;
+      }
+
+      if (reallyread) {
+        registers_set(dest, _interim);
+      }
+
       break;
 
     case INST_PWRITE:
+      port = value & PORT_FLAG_PSEL;
+      nbytes = 1 + ((value & PORT_FLAG_NBYTE) >> 3);
+      int useregister = (value & PORT_FLAG_USEREG) == 0;
+
+      int output;
+      if (useregister) {
+        output = registers_get(src);
+      } else {
+        output = (value & PORT_FLAG_REMAIN) >> 8;
+      }
+
+      if (nbytes == 1) {
+        unsigned char real_output = (unsigned char)(output);
+        port_write(port, real_output);
+      } else {
+        unsigned short real_output = (unsigned short)(output);
+        port_write2(port, real_output);
+      }
+
       break;
 
     case INST_SETI:
@@ -217,7 +249,7 @@ int instructions_read_and_execute() {
   char src = (srcdest & 0xF0) >> 4;
   char dest = srcdest & 0x0F;
   int value = 0;
-  if (code & 0x1 == 0x1) {
+  if ((code & 0x1) == 0x1) {
     value = memory_read(pc, 3);
     pc += 3;
   }

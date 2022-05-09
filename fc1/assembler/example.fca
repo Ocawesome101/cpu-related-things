@@ -1,7 +1,7 @@
 ; this is an example of FC-1 assembly
 
 ; this program expects to be run as BIOS, which is loaded to 0x4000
-#offset 0x4000
+*offset 0x4000
 
 ; set up an interrupt vector table
 imm a4, .ivt
@@ -61,29 +61,29 @@ imm a4, .ivt
   jump a5, .print
 
 .ivt
-#dw .timer
-#dw .iodvc
-#dw .nsjmp
-#dw .generalfault
-#dw .doublefault
-#dw 0
-#dw .stackoverflow
-#dw .segfault
-#dw .illegal
+*dw .timer
+*dw .iodvc
+*dw .nsjmp
+*dw .generalfault
+*dw .doublefault
+*dw 0
+*dw .stackoverflow
+*dw .segfault
+*dw .illegal
 
 .text_timer
-#dw "Got timer\n" 0
+*dw "Got timer\n" 0
 .text_iodvc
-#dw "I/O device interrupt\n" 0
+*dw "I/O device interrupt\n" 0
 .text_nsjmp
-#dw "Jump to protected segment\n" 0
+*dw "Jump to protected segment\n" 0
 .text_generalfault
-#dw "!!Unhandled interrupt!!\n" 0
+*dw "!!Unhandled interrupt!!\n" 0
 .text_doublefault
-#dw "!!DOUBLE FAULT!!\n" 0
+*dw "!!DOUBLE FAULT!!\n" 0
 .text_stackoverflow
-#dw "!!STACK OVERFLOW!!\n" 0
+*dw "!!STACK OVERFLOW!!\n" 0
 .text_segfault
-#dw "Segmentation fault\n" 0
+*dw "Segmentation fault\n" 0
 .text_illegal
-#dw "Illegal instruction\n" 0
+*dw "Illegal instruction\n" 0
