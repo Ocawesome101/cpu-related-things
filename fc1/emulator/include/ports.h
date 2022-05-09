@@ -8,23 +8,26 @@
 
 typedef unsigned char (*port_reader) ();
 typedef int (*port_writer) (unsigned char);
-typedef int (*port_isready) ();
+typedef int (*port_status) ();
 
 struct Port {
   int registered;
   char id;
   port_reader read;
   port_writer write;
-  port_isready isready;
+  port_status isready;
+  port_status getdevid;
 };
 
 void port_register_device(char id, port_reader reader, port_writer writer,
-    port_isready isready);
+    port_status isready, port_status getdevid);
 
 void ports_init();
 unsigned char port_read(char port);
 unsigned short port_read2(char port);
 void port_write(char port, unsigned char byte);
 void port_write2(char port, unsigned short bytes);
+int port_isready(char port);
+int port_getdevid(char port);
 
 #endif

@@ -31,7 +31,12 @@ int tty_isready() {
   }
 }
 
+int tty_getdevid() {
+  return 2;
+}
+
 int device_open(void) {
-  port_register_device(0, &tty_reader, &tty_writer, &tty_isready);
+  port_register_device(0, &tty_reader, &tty_writer, &tty_isready,
+      &tty_getdevid);
   return 0;
 }

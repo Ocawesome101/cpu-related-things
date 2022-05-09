@@ -62,7 +62,7 @@ xori      0010001 1 DEST ~= VALUE
 == Port I/O ==
 devid     0010010 0 Request the device ID of the device attached to the port stored in the SRC register
 pread     0010010 1 Read into DEST, with extra parameters in VALUE (below)
-pisready  0010011 0 Check if the device whose port is stored in SRC has any data ready
+pisready  0010011 0 Check if the device whose port is stored in SRC has any data ready; return value in DEST
 pwrite    0010011 1 Write from SRC to port, extra parameters in VALUE:
     bit | meaning
    0..2 | select port (0-5)
@@ -140,8 +140,8 @@ Here are some standard memory-mapped I/O devices:
   - an 80x25 text screen from 0x200; in exactly the same format as the VGA framebuffer
 
 Here are some standard port devices:
-  - A serial console (device ID 0)
   - A keyboard (device ID 1)
+  - A serial console (device ID 2)
   - A storage device (device ID 5)
 
 All port devices must return a device ID when they are requested to do so.

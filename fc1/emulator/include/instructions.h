@@ -40,10 +40,10 @@
 #define INST_ORI      33
 #define INST_XOR      34
 #define INST_XORI     35
-// skip one
 /* Port I/O */
+#define INST_DEVID    36
 #define INST_PREAD    37
-// skip one
+#define INST_PISREADY 38
 #define INST_PWRITE   39
 // skip many
 /* Interrupts */

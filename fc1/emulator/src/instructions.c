@@ -175,6 +175,10 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
       registers_set(dest, registers_get(dest) ^ value);
       break;
 
+    case INST_DEVID:
+      registers_set(dest, port_getdevid(registers_get(src) & PORT_FLAG_PSEL));
+      break;
+
     case INST_PREAD:
       port = value & PORT_FLAG_PSEL;
       nbytes = 1 + ((value & PORT_FLAG_NBYTE) >> 3);
@@ -193,6 +197,10 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
         registers_set(dest, _interim);
       }
 
+      break;
+
+    case INST_PISREADY:
+      registers_set(dest, port_isready(registers_get(src) & PORT_FLAG_PSEL));
       break;
 
     case INST_PWRITE:
