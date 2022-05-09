@@ -12,7 +12,7 @@ gcc *.c -I$basedir/include -ldl -o $basedir/fc1 -rdynamic -Wno-incompatible-poin
 cd devices
 
 for f in $(ls); do
-  gcc "$f" -I$basedir/include -shared -fPIC -o $basedir/devices/${f%.c}.o
+  gcc "$f" -I$basedir/include -shared -fPIC -o $basedir/devices/${f%.c}.so
 done
 
 cd ../..

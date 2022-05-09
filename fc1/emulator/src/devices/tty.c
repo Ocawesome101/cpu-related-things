@@ -31,7 +31,7 @@ int tty_isready() {
   }
 }
 
-int device_open() {
+int device_open(void) {
   printf("test\n");
   port_register_device(0, &tty_reader, &tty_writer, &tty_isready);
   return 0;

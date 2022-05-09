@@ -21,7 +21,7 @@ void load_device(char* file) {
   dlerror();
 
   int (*device_open)(void);
-  *(void **) (&device_open) = dlsym(dlfd, "device_open");
+  device_open = (int (*)(void)) dlsym(dlfd, "device_open");
 
   new = dlerror();
   dlclose(dlfd);
