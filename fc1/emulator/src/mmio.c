@@ -3,12 +3,12 @@
 #include "mmio.h"
 
 // uses """"DMA"""" for slightly better performance
-char* memdata;
+unsigned char* memdata;
 int registered = 0;
 mmio_Device* devices[MMIO_DEVICE_COUNT];
 mmio_Range ranges[MMIO_DEVICE_COUNT];
 
-void mmio_init(char* mem) {
+void mmio_init(unsigned char* mem) {
   memdata = mem;
 }
 

@@ -8,6 +8,9 @@
 #include "interrupts.h"
 #include "instructions.h"
 #include "emulator.h"
+#ifdef FC1_DEBUG
+#include <stdio.h>
+#endif
 
 int instructions_execute(unsigned char code, char src, char dest, int value) {
   char port;
@@ -15,7 +18,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
   switch (code) {
     case INST_NOP:
       break;
-    
+
     case INST_IDLOAD:
       registers_set(dest, memory_read(registers_get(src), 3));
       break;
@@ -49,13 +52,19 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
       break;
     
     case INST_POP:
-      registers_set(dest, stack_pop());
+      int _pop_value = stack_pop();
+#ifdef FC1_DEBUG
+      printf("pop value=%d into reg=%d\n", _pop_value, dest);
+#endif
+      registers_set(dest, _pop_value);
       break;
     
     case INST_COMPARE:
       int flags = 0;
-      int sval = registers_get(src), dval = registers_get(dest);
-      
+      unsigned char sval = registers_get(src), dval = registers_get(dest);
+#ifdef FC1_DEBUG
+      printf("compare sval=%d, dval=%d\n", sval, dval);
+#endif
       if (sval > dval)
         flags |= CMPFLAGS_GREATER;
       if (sval < dval)
@@ -68,13 +77,19 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
     
     case INST_JUMP:
       if (registers_get(REG_CMP) == registers_get(src)) {
-        registers_set(REG_PC, value);
+#ifdef FC1_DEBUG
+        printf("JUMP to %d\n", (int)value);
+#endif
+        registers_set(REG_PC, (int)value);
         return -1;
       }
       break;
     
     case INST_IDJUMP:
       if (registers_get(REG_CMP) == registers_get(src)) {
+#ifdef FC1_DEBUG
+        printf("IDJUMP to %d\n", registers_get(dest));
+#endif
         registers_set(REG_PC, registers_get(dest));
         return -1;
       }
@@ -226,6 +241,9 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
       break;
 
     case INST_SETI:
+#ifdef FC1_DEBUG
+      printf("enable interrupts\n");
+#endif
       interrupts_set(1);
       break;
 
@@ -251,18 +269,25 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
 
 // read and execute one instruction
 int instructions_read_and_execute() {
-  int pc = registers_get(REG_PC);
+  int pc = (int)registers_get(REG_PC);
   unsigned char code = (unsigned char)memory_read(pc++, 1);
   char srcdest = (char)memory_read(pc++, 1);
-  char src = (srcdest & 0xF0) >> 4;
-  char dest = srcdest & 0x0F;
-  int value = 0;
+
+  char src  =  srcdest & 0x0F;
+  char dest = (srcdest & 0xF0) >> 4;
+
+  unsigned int value = 0;
   if ((code & 0x1) == 0x1) {
     value = memory_read(pc, 3);
     pc += 3;
   }
 
   int result = instructions_execute(code, src, dest, value);
+#ifdef FC1_DEBUG
+  printf("inst code=%d(src=%d,dest=%d,value=%u) result=%d (pc=%d)\n",
+      code, src, dest, value, result, pc);
+#endif
+
   if (result == 0)
     registers_set(REG_PC, pc);
   return 0;

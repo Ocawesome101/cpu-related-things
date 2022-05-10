@@ -3,6 +3,8 @@ FC-1
 
 The FC-1 is a general-purpose 24-bit processor supporting up to 16MB of memory.  There are 10 general-purpose, 24-bit registers.  There are 6 "attribute" registers for setting CPU attributes such as where the stack is.
 
+The FC-1 is little-endian.
+
 There is 1 24-bit memory bus.  There are 6 generic 16-bit IO busses.  Events are primarily interrupt-driven.  Memory-mapped IO is supported.
 
 Instruction Format:
@@ -132,7 +134,7 @@ Interrupts will always place their parameters onto the stack, preceded by the pr
   pop r0
   idjump a5, r0
 
-The Interrupt Descriptor Table is a set of 8 4-byte interrupt vector pointers.
+The Interrupt Descriptor Table is a set of 16 4-byte interrupt vector pointers.
 
 I/O
 -----

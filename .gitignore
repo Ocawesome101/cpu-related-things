@@ -2,3 +2,4 @@
 fc1/emulator/fc1
 *.o
 *.so
+*.bin

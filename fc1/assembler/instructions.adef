@@ -1,0 +1,45 @@
+*instsize 8
+*fixwidth true
+*register r 0 9
+*register a 10 15
+0x00  nop       *pad  8
+0x02  idload    1 4 4
+0x03  load      4 4 4 24
+0x04  move      1 4 4
+0x05  imm       4 4X 4 24
+0x06  idstore   1 4 4 
+0x07  store     4 4 4 24
+0x08  push      1 4 4X
+0x09  pushi     4 4X 4X 24
+0x0A  pop       1 4X 4
+0x0C  compare   1 4 4
+0x0D  jump      4 4 4X 24
+0x0E  idjump    1 4 4
+0x0F  rjump     4 4 4X 24
+0x10  add       1 4 4
+0x11  addi      4 4X 4 24
+0x12  sub       1 4 4
+0x13  subi      4 4X 4 24
+0x14  mult      1 4 4
+0x15  multi     4 4X 4 24
+0x16  div       1 4 4
+0x17  divi      4 4X 4 24
+0x18  lshift    1 4 4
+0x19  lshifti   4 4X 4 24
+0x1A  rshift    1 4 4
+0x1B  rshifti   4 4X 4 24
+0x1C  not       1 4X 4
+0x1E  and       1 4 4
+0x1F  andi      4 4X 4 24
+0x20  or        1 4 4
+0x21  ori       4 4X 4 24
+0x22  xor       1 4 4
+0x23  xori      4 4X 4 24
+0x24  devid     1 4 4
+0x25  pread     4 4X 4 3 1 1 3X 16?21
+0x26  pisready  
+0x27  pwrite    4 4 4X 3 1 1 3X 16X
+0xFA  seti      *pad  8
+0xFB  irq       4 4 4 24
+0xFC  clri      *pad  8
+0xFE  halt      *pad  8

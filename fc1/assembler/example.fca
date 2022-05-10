@@ -1,10 +1,18 @@
 ; this is an example of FC-1 assembly
+; this particular program only sort of works due to an emulator bug
 
 ; this program expects to be run as BIOS, which is loaded to 0x4000
 *offset 0x4000
 
 ; set up an interrupt vector table
 imm a4, .ivt
+seti
+
+; print "hello, world" on repeat
+.hello_loop
+  imm r0, .text_hello
+  pushi .hello_loop
+  jump a5, .print
 
 ; print text pointed to by r0
 .print
@@ -12,78 +20,87 @@ imm a4, .ivt
   imm r3, 4
   .printloop
     idload r0, r1
-    ; assume the serial port is port 2
+    ; assume the serial port is port 0
     ; data, port, 1 or 2 bytes, write from SRC or from immediate
-    pwrite r1, 2, 0, 0
+    pwrite r1, 0, 0, 0
     compare r1, r2
     addi r0, 1
     jump r3, .printloop
-  pop r0
-  idjump a5, r0
+  pop r5
+  idjump a5, r5
 
 .isr_ret
+  seti
   pop r0
   idjump a5, r0
 
 .timer
+  clri
   imm r0, .text_timer
-  push .isr_ret
+  pushi .isr_ret
   jump a5, .print
 
 .iodvc
   imm r0, .text_iodvc
-  push .isr_ret
+  pushi .isr_ret
   jump a5, .print
 
 .nsjmp
   imm r0, .text_nsjmp
-  push .isr_ret
+  pushi .isr_ret
   jump a5, .print
 
 .doublefault
   imm r0, .text_doublefault
-  push .isr_ret
+  pushi .isr_ret
+  jump a5, .print
+
+.generalfault
+  imm r0, .text_generalfault
+  pushi .isr_ret
   jump a5, .print
 
 .stackoverflow
   imm r0, .text_stackoverflow
-  push .isr_ret
+  pushi .isr_ret
   jump a5, .print
 
 .segfault
   imm r0, .text_segfault
-  push .isr_ret
+  pushi .isr_ret
   jump a5, .print
 
 .illegal
   imm r0, .text_illegal
-  push .isr_ret
+  pushi .isr_ret
   jump a5, .print
 
 .ivt
-*dw .timer
-*dw .iodvc
-*dw .nsjmp
-*dw .generalfault
-*dw .doublefault
-*dw 0
-*dw .stackoverflow
-*dw .segfault
-*dw .illegal
+*dw4 .timer
+*dw4 .iodvc
+*dw4 .nsjmp
+*dw4 .generalfault
+*dw4 .doublefault
+*dw4 0
+*dw4 .stackoverflow
+*dw4 .segfault
+*dw4 .illegal
 
+.text_hello
+*dw "Hello, world!" 10 0
 .text_timer
-*dw "Got timer\n" 0
+*dw "Got timer" 10 0
 .text_iodvc
-*dw "I/O device interrupt\n" 0
+*dw "I/O device interrupt" 10 0
 .text_nsjmp
-*dw "Jump to protected segment\n" 0
+*dw "Jump to protected segment" 10 0
 .text_generalfault
-*dw "!!Unhandled interrupt!!\n" 0
+*dw "!!Unhandled interrupt!!" 10 0
 .text_doublefault
-*dw "!!DOUBLE FAULT!!\n" 0
+*dw "!!DOUBLE FAULT!!" 10 0
 .text_stackoverflow
-*dw "!!STACK OVERFLOW!!\n" 0
+*dw "!!STACK OVERFLOW!!" 10 0
 .text_segfault
-*dw "Segmentation fault\n" 0
+*dw "Segmentation fault" 10 0
 .text_illegal
-*dw "Illegal instruction\n" 0
+*dw "Illegal instruction" 10 0
