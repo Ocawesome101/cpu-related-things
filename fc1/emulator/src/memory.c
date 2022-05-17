@@ -34,6 +34,9 @@ int memory_reads(int address, int length, unsigned char* buffer) {
 // write some number of bytes
 int memory_write(int address, unsigned int value, int length) {
   for (int i = 0; i < length; i++) {
+#ifdef FC1_DEBUG
+    printf("[emulator] write %d to address %d\n", value & 0xFF, address + i);
+#endif
     memory[address + i] = value & 0xFF;
     value >>= 8;
   }

@@ -1,0 +1,113 @@
+; Test all the FC-1 instructions.
+
+*offset 0x4000
+
+; NOP - should do nothing
+nop
+nop
+nop
+nop
+
+imm r0, .load_test
+imm r1, .idstore_test
+
+; idload, idstore
+idload r0, r2
+idstore r2, r1
+imm r2, 0
+idload r1, r2
+
+; print it
+imm r6, .idstore_test
+move a0, r5
+addi r5, 19
+push r5
+jump a5, .print
+
+; reset it
+imm r1, 0
+imm r2, 0
+
+; imm, move, addi, push, jump
+imm r6, .print_text
+move a0, r5
+addi r5, 19
+push r5
+jump a5, .print
+
+; imm
+
+; load, store
+load r0, r2
+store r2, .store_test
+
+; print result
+imm r6, .store_test
+move a0, r5
+addi r5, 19
+push r5
+jump a5, .print
+
+; reset registers used
+imm r0, 0
+imm r1, 0
+imm r2, 0
+
+; pushi, pop
+pushi 0x636465
+pop r0
+store r0, .store_test
+
+imm r6, .store_test
+move a0, r5
+addi r5, 19
+push r5
+jump a5, .print
+
+; rjump
+rjump a5, 5
+nop
+nop
+
+; skip arithmetic instructions for now
+
+; port I/O
+imm r0, 0
+devid r0, r1
+addi r1, 48
+store r1, .store_test
+
+imm r6, .store_test
+move a0, r5
+addi r5, 19
+push r5
+jump a5, .print
+
+.loop
+pread r0, 0, 0, 0
+pwrite r0, 0, 0, 0
+jump a5, .loop
+
+; print a message
+; tests: imm, idload, pwrite, compare, pop, idjump
+.print
+  imm r8, 0
+  imm r9, 4
+  .ploop
+    idload r6, r7
+    pwrite r7, 0, 0, 0
+    compare r7, 8
+    addi r6, 1
+    jump r9, .ploop
+  pop r6
+  idjump a5, r6
+
+.print_text
+*dw "Test is run" 10 0
+.load_test
+; this is "abc"
+*dw 0x636261
+.idstore_test
+*dw 0 0 0 10 0
+.store_test
+*dw 0 0 0 10 0

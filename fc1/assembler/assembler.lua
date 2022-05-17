@@ -290,10 +290,6 @@ end
 
 local binout = ""
 
-for k, v in pairs(label_locations) do
-  print(k, v)
-end
-
 -- pass 2: final binary form
 for _, words in ipairs(lines) do
   local line = words.lineno
