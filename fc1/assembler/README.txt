@@ -1,3 +1,5 @@
+// Instruction Definition
+
 The FC-1 assembler is interestingly reusable.  These are docs for the format it uses so I can remember them when I look back on this code in six months.
 
 The base assembler code makes very few assumptions about the underlying platform.  All instructions are defined in the text file `instructions.adef`.  This file uses a very simple format.  See the included file (FC-1 instruction definitions) for a comprehensive example.
@@ -44,3 +46,18 @@ Instructions are defined as an opcode and a mnemonic followed by one or more arg
         set - otherwise, it is 16 bits of padding.
 
 Note that conditional arguments may only be based upon preceding bits of the same instruction.
+
+
+// Assembly syntax
+
+This assembler uses a very simple and relatively standard assembly language syntax, with the most noticeable peculiarity being its use of * to denote special directives.  Labels are denoted with a . and may be accessed anywhere in the program.  Arguments may be separated with a comma (,), one or more spaces ( ), or both.  Comments are prefixed with a semicolon (;).  See the included assembly files for examples.
+
+Available directives are:
+
+  *offset number
+    Sets the offset at which the program expects to be run.  Defaults to 0.
+
+  *dw[N] ...
+    Insert some static data, where [N] is optionally a minimum number of bytes:
+      '*dw "Hello, world!" 10 0' inserts the bytes '48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21 0A 00'.
+      '*dw4 0x2' inserts '02 00 00 00'.
