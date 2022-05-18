@@ -19,35 +19,30 @@ idload r1, r2
 
 ; print it
 imm r6, .idstore_test
-move a0, r5
-addi r5, 19
-push r5
+pushi .pret_0
 jump a5, .print
 
+.pret_0
 ; reset it
 imm r1, 0
 imm r2, 0
 
 ; imm, move, addi, push, jump
 imm r6, .print_text
-move a0, r5
-addi r5, 19
-push r5
+pushi .pret_1
 jump a5, .print
 
-; imm
-
+.pret_1
 ; load, store
-load r0, r2
+load r0, .load_test
 store r2, .store_test
 
 ; print result
 imm r6, .store_test
-move a0, r5
-addi r5, 19
-push r5
+pushi .pret_2
 jump a5, .print
 
+.pret_2
 ; reset registers used
 imm r0, 0
 imm r1, 0
@@ -59,11 +54,10 @@ pop r0
 store r0, .store_test
 
 imm r6, .store_test
-move a0, r5
-addi r5, 19
-push r5
+pushi .pret_3
 jump a5, .print
 
+.pret_3
 ; rjump
 rjump a5, 5
 nop
@@ -78,9 +72,7 @@ addi r1, 48
 store r1, .store_test
 
 imm r6, .store_test
-move a0, r5
-addi r5, 19
-push r5
+pushi .loop
 jump a5, .print
 
 .loop
@@ -108,6 +100,6 @@ jump a5, .loop
 ; this is "abc"
 *dw 0x636261
 .idstore_test
-*dw 0 0 0 10 0
+*dw 0 0 0 10 0 0 0
 .store_test
 *dw 0 0 0 10 0

@@ -8,10 +8,16 @@
 #include <stdio.h>
 
 unsigned char tty_reader() {
+#ifdef TTY_DEBUG
+  printf("read char\n");
+#endif
   return (unsigned char)getchar();
 }
 
 int tty_writer(unsigned char byte) {
+#ifdef TTY_DEBUG
+  printf("write char%d\n", (char)byte);
+#endif
   putchar((int)byte);
   return 0;
 }

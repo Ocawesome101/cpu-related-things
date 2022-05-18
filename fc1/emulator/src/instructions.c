@@ -197,7 +197,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
     case INST_PREAD:
       port = value & PORT_FLAG_PSEL;
       nbytes = 1 + ((value & PORT_FLAG_NBYTE) >> 3);
-      int reallyread = (value & PORT_FLAG_USEREG) != 0;
+      int reallyread = (value & PORT_FLAG_USEREG) == 0;
 
       int _interim;
       if (nbytes == 1) {
@@ -260,7 +260,10 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
       break;
     
     default:
-      interrupts_fire(INT_ILGLINST, -1, -1);
+      if (interrupts_fire(INT_ILGLINST, -1, -1) != 0) {
+        printf("illegal instruction %x\n", code);
+        exit(1);
+      }
       return -1;
   }
 

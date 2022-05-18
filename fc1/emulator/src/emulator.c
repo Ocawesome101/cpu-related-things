@@ -85,8 +85,10 @@ int main() {
         registers_get(4), registers_get(5), registers_get(6), registers_get(7),
         registers_get(8), registers_get(9), registers_get(10), registers_get(11),
         registers_get(12), registers_get(13), registers_get(14), registers_get(15));
+#ifdef FC1_STEP
     getchar();
-#endif
+#endif // FC1_STEP
+#endif // FC1_DEBUG
   }
   return 0;
 }

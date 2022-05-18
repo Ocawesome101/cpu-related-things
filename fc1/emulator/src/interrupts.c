@@ -12,7 +12,7 @@ void interrupts_init() {}
 
 int interrupts_fire(int code, int par1, int par2) {
   if (!enabled) {
-    return 0;
+    return -1;
   }
 
 #ifdef FC1_DEBUG
