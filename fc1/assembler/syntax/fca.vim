@@ -26,7 +26,7 @@ syn keyword fcaDirective dw
 syn match fcaDirective "dw\d*"
 
 " labels
-syn match fcaLabel "\.[a-zA-Z_-]*"
+syn match fcaLabel "\.[a-zA-Z0-9_-]*"
 
 " registers
 syn match fcaRegister "a[0-5]"
