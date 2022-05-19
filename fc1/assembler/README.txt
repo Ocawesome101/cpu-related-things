@@ -61,3 +61,9 @@ Available directives are:
     Insert some static data, where [N] is optionally a minimum number of bytes:
       '*dw "Hello, world!" 10 0' inserts the bytes '48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21 0A 00'.
       '*dw4 0x2' inserts '02 00 00 00'.
+
+  *$MACRO ...
+    Expand macro 'MACRO' and insert its output here.
+
+
+See `examples/macro.fca` for example usage.

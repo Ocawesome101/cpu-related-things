@@ -49,6 +49,8 @@ int emulator_load_bios() {
 }
 
 int emulator_halt() {
+  printf("[emulator] TODO: properly implement halting\n");
+  exit(0);
   return 0;
 }
 

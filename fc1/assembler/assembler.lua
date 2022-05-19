@@ -179,6 +179,8 @@ end
 local lines = {}
 local raw_lines = {}
 
+local macros = {}
+
 local binout_temp = ""
 
 local function dw(line)
@@ -214,15 +216,98 @@ local function dw(line)
   return ret
 end
 
--- pass 1: determine label offsets
-local offset = 0
-local current_line = 0
+-- pass 0: expand macros
+local current_macro
+local expanded_lines = {}
+
 for line in io.lines(file) do
-  current_line = current_line + 1
+  expanded_lines[#expanded_lines+1] = line
+end
+
+local function expand_macro(words, line, i, pre)
+  local name = words[1]
+  if not name then
+    die("bad macro expansion '%s'", line)
+  end
+
+  if not macros[name] then
+    die("undefined macro '%s'", name)
+  end
+
+  for j=1, #words, 1 do
+    if words[j] == "#" then
+      words[j] = macros[name].uses
+    end
+  end
+
+  for n, _line in ipairs(macros[name]) do
+    table.insert(expanded_lines, i + n, (pre or "") ..
+      (_line:gsub("#", macros[name].uses):gsub("$([@%$%d])", function(id)
+        if id == "$" and #words == 1 then
+          die("macro '%s' expects at least 1 argument", name)
+        end
+
+        if id == "@" or id == "$" then
+          return table.concat(words, " ", 2)
+        end
+
+        id = tonumber(id)
+        if words[id+1] then
+          return words[id+1]
+        else
+          die("macro '%s' expects at least %d arguments", name, n)
+        end
+      end)))
+  end
+
+  macros[name].uses = macros[name].uses + 1
+
+  if not pre then table.remove(expanded_lines, i) end
+end
+
+do
+  local i = 1
+  while expanded_lines[i] do
+    local line = expanded_lines[i]:gsub("^ +", "")
+
+    if line:sub(1,2) == "*$" then
+      local words = split(line:sub(3))
+      expand_macro(words, line, i)
+
+    elseif line:sub(1,7) == ";$macro" then
+      local name = line:match(";$macro ([^ ]+)$")
+      if not name then
+        die("bad macro syntax '%s'", line)
+      end
+
+      if current_macro then
+        die("dangling macro '%s'", current_macro)
+      end
+
+      current_macro = name
+      macros[current_macro] = {uses = 0}
+
+    elseif line:sub(1,5) == ";$end" then
+      current_macro = nil
+
+    elseif line:sub(1,2) == ";$" then
+      table.insert(macros[current_macro], line:sub(3))
+    end
+
+    i = i + 1
+  end
+end
+
+if current_macro then
+  die("dangling macro '%s'", current_macro)
+end
+
+-- pass 1: determine label offsets and find macros
+local offset = 0
+for current_line, line in ipairs(expanded_lines) do
   line = line:gsub("^ +", ""):gsub(";.+", "")
 
   if line:sub(1,1) ~= "*" then line = line:gsub(",", "") end
-
 
   if #line > 0 then
     local words = split(line)
