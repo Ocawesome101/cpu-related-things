@@ -20,12 +20,12 @@ int interrupts_fire(int code, int par1, int par2) {
 #endif
 
   // push registers in accordance with ISA calling convention
+  stack_push(registers_get(REG_PC));
   for (int i = 0; i < 16; i++) {
     if (i != REG_PC) {
       stack_push(registers_get(i));
     }
   }
-  stack_push(registers_get(REG_PC));
 
   if (par2 > -1)
     stack_push(par2);

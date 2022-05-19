@@ -4,6 +4,26 @@
 ; this program expects to be run as BIOS, which is loaded to 0x4000
 *offset 0x4000
 
+; restore registers
+;$macro restore_regs
+;$pop a5
+;$pop a4
+;$pop a3
+;$pop a2
+;$pop a1
+; skip program counter
+;$pop r9
+;$pop r8
+;$pop r7
+;$pop r6
+;$pop r5
+;$pop r4
+;$pop r3
+;$pop r2
+;$pop r1
+;$pop r0
+;$end
+
 ; set up an interrupt vector table
 imm a4, .ivt
 seti
@@ -30,9 +50,10 @@ seti
   idjump a5, r5
 
 .isr_ret
+*$restore_regs
   seti
-  pop r0
-  idjump a5, r0
+  pop r9
+  idjump a5, r9
 
 .timer
   clri
