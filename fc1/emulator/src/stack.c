@@ -11,7 +11,7 @@ int stack_push(int value) {
   int stackroot = registers_get(REG_SR);
   int stackoff = registers_get(REG_SI);
   stackoff += 3;
-  
+
   int address = stackroot + stackoff;
   registers_set(REG_SI, stackoff);
 
@@ -26,7 +26,7 @@ int stack_pop() {
   int ret = memory_read(address, 3);
   memory_write(address, 0, 3);
   stackoff -= 3;
-  
+
   registers_set(REG_SI, stackoff);
   return ret;
 }

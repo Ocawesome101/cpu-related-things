@@ -8,9 +8,9 @@
 #include "interrupts.h"
 #include "instructions.h"
 #include "emulator.h"
-#ifdef FC1_DEBUG
+
 #include <stdio.h>
-#endif
+#include <stdlib.h>
 
 int instructions_execute(unsigned char code, char src, char dest, int value) {
   char port;
@@ -22,35 +22,35 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
     case INST_IDLOAD:
       registers_set(dest, memory_read(registers_get(src), 3));
       break;
-    
+
     case INST_LOAD:
       registers_set(dest, memory_read(value, 3));
       break;
-    
+
     case INST_MOVE:
       registers_set(dest, registers_get(src));
       break;
-    
+
     case INST_IMM:
       registers_set(dest, value);
       break;
-    
+
     case INST_IDSTORE:
       memory_write(registers_get(dest), registers_get(src), 3);
       break;
-    
+
     case INST_STORE:
       memory_write(value, registers_get(src), 3);
       break;
-    
+
     case INST_PUSH:
       stack_push(registers_get(src));
       break;
-    
+
     case INST_PUSHI:
       stack_push(value);
       break;
-    
+
     case INST_POP:
       int _pop_value = stack_pop();
 #ifdef FC1_DEBUG
@@ -58,7 +58,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
 #endif
       registers_set(dest, _pop_value);
       break;
-    
+
     case INST_COMPARE:
       int flags = 0;
       unsigned char sval = registers_get(src), dval = registers_get(dest);
@@ -74,7 +74,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
 
       registers_set(REG_CMP, flags);
       break;
-    
+
     case INST_JUMP:
       if (registers_get(REG_CMP) == registers_get(src)) {
 #ifdef FC1_DEBUG
@@ -84,7 +84,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
         return -1;
       }
       break;
-    
+
     case INST_IDJUMP:
       if (registers_get(REG_CMP) == registers_get(src)) {
 #ifdef FC1_DEBUG
@@ -258,7 +258,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
     case INST_HALT:
       emulator_halt();
       break;
-    
+
     default:
       if (interrupts_fire(INT_ILGLINST, -1, -1) != 0) {
         printf("illegal instruction %x\n", code);

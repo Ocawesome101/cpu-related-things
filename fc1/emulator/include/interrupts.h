@@ -10,7 +10,7 @@
 #define INT_DBLFAULT 4
 #define INT_TRPFAULT 5
 #define INT_STKOVERF 6
-#define INT_SEGFAULT 7
+#define INT_SDTFAULT 7
 #define INT_ILGLINST 8
 
 void interrupts_init();

@@ -110,12 +110,12 @@ The Segment Descriptor Table provides descriptions of memory segments.  Its layo
   1 byte: flags
     0 | protected (fire NSJMP on entry)
     1 | can jump (otherwise fire SEGFAULT)
+    2 | can set register A3
   3 bytes: start address
   3 bytes: end address
 
-INTERRUPT DESCRIPTOR TABLE
+INTERRUPTS
 ----------------------------
-INTERRUPTS:
 IRQ  MEANING
 00   TIMER - Internal timer       - no parameters
 01   IODVC - I/O device interrupt - two parameters (DEVID, REQID)
@@ -123,16 +123,19 @@ IRQ  MEANING
 04 DBLFAULT  Double fault (unhandled interrupt)
 05 TRPFAULT  Triple fault (uncaught double fault, hard resets)
 06 STKOVERF  Stack overflow (stack exceeded segment boundaries)
-07 SEGFAULT  Segmentation fault (attempt to jump to a protected or NOJUMP segment)
+07 SDTFAULT  Segment descriptor violation (attempt to jump to a protected or 
+              NOJUMP segment, or write to A3 if it is disallowed)
 08 ILGLINST  Illegal instruction
 9-15       - reserved for future ISA revisions
 16  SFIRQ  - Software interrupt   - no parameters
 
+When fired, an interrupt results in the following actions:
 
-Interrupts will always place their parameters onto the stack, preceded by the previous program counter location.  Thus, to return from an interrupt handler after removing its arguments from the stack, the following code should suffice:
-
-  pop r0
-  idjump a5, r0
+  - All registers 0 through 9 are pushed onto the stack, with the program
+    counter skipped and instead pushed *last*.
+  - The interrupt's arguments are pushed onto the stack in reverse order,
+    followed by the number of arguments.
+  - The processor jumps to the interrupt vector's location.
 
 The Interrupt Descriptor Table is a set of 16 4-byte interrupt vector pointers.
 
