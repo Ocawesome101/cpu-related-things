@@ -52,6 +52,12 @@ Note that conditional arguments may only be based upon preceding bits of the sam
 
 This assembler uses a very simple and relatively standard assembly language syntax, with the most noticeable peculiarity being its use of * to denote special directives.  Labels are denoted with a . and may be accessed anywhere in the program.  Arguments may be separated with a comma (,), one or more spaces ( ), or both.  Comments are prefixed with a semicolon (;).  See the included assembly files for examples.
 
+A highlighting file for [Neo]Vim is included in this tree.  To make Vim automatically recognize the file type, create `ftdetect/fca.vim` in the appropriate configuration directory, with the contents
+
+  autocmd BufRead,BufNewFile *.fca setfiletype fca
+
+
+
 Available directives are:
 
   *offset number
