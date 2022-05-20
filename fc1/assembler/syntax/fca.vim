@@ -37,8 +37,8 @@ syn match fcaNumber "\<\d\+\>"
 syn match fcaNumber "\<0x\x\+\>"
 
 " strings
-syn region fcaString start=+"+ end=+"+ contains=All
-syn region fcaString start=+'+ end=+'+ contains=All
+syn region fcaString start=+"+ end=+"+
+syn region fcaString start=+'+ end=+'+
 
 " instructions
 syn keyword fcaInstruction nop idload load move imm idstore store push pushi pop compare jump idjump rjump add addi sub subi mult multi div divi lshift lshifti rshift rshifti not and andi or ori xor xori devid pread pisready pwrite seti irq clri halt
