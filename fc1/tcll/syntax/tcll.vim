@@ -3,12 +3,12 @@
 " Maintainer: Ocawesome101
 
 syn keyword tcllTodo contained TODO NOTE FIXME
-syn match tcllComment "//.*$" contains=tcllTodo
 
 syn region tcllString start=+"+ end=+"+
 syn region tcllChar start=+'+ end=+'+
 
-syn match tcllOperator "[@\$=\+;!<>&~\^:,\*/-]"
+syn match tcllOperator "[@\$=\+;!<>&~\^:,\*/\-]"
+syn match tcllComment "//.*$" contains=tcllTodo
 
 syn match tcllNumber "\<\d\+\>"
 syn match tcllNumber "\<0x\x\+\>"

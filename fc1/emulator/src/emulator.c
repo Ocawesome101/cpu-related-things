@@ -64,7 +64,7 @@ int main() {
   clock_gettime(CLOCK_MONOTONIC, &time_a);
 
   while (1) {
-    // check if we need to fire a timer interrupt
+    /*/ check if we need to fire a timer interrupt
     clock_gettime(CLOCK_MONOTONIC, &time_b);
 
     if ((time_b.tv_nsec - time_a.tv_nsec) > TIMER_TICKS) {
@@ -76,7 +76,7 @@ int main() {
       time_a.tv_nsec = time_b.tv_nsec;
     }
 
-    // self explanatory
+    // */// self explanatory
     instructions_read_and_execute();
 #ifdef FC1_DEBUG
     printf("%8d %8d %8d %8d\n"
