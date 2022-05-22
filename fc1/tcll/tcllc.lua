@@ -64,7 +64,7 @@ function g.number()
   if tok.ttype ~= "number" then
     die("expected number near '%s'", tok.token)
   end
-  return tok.token
+  return tonumber(tok.token)
 end
 
 function g.operator()
@@ -83,141 +83,116 @@ function g.word()
   return tok.token
 end
 
-function g.semicolon()
-  local tok = read()
-  if (not tok) or tok.token ~= ";" then
-    die("missing ';' near '%s'", tok and tok.token or "EOF")
-  end
-  return tok.token
+function g.look()
+  return peek() and peek().token
 end
 
-function g.addop()
-  return (peek() and peek().token:match("[%+%-]"))
+function g.looktype()
+  return peek() and peek().ttype
 end
 
-function g.mulop()
-  return (peek() and peek().token:match("[%*/]"))
-end
-
-local function emitCall(f)
-  f = "." .. f
-  for _i=10, 0, -1 do
-    emit("push %d", _i)
-  end
-  emit("jump a5, %s", f)
-end
-
-local function emitReturn(value)
-  for _i=0, 9, 1 do
-    emit("pop %s", _i)
-  end
-  emit("pop a5")
-  emit("pushi", value)
-  emit("jump a5, a5")
-end
-
-function g.ident()
-  local name = g.word()
-  if peek().token == "(" then
+function g.match(c)
+  if g.look() == c then
     read()
-    read()
-    emitCall(name)
   else
-    emit("load r9, .%s", name)
-    emit("push r9")
+    die("expected '%s' near '%s", c, g.look())
   end
 end
+
+local function is_add(c)
+  return c == "+" or c == "-"
+end
+
+local function is_mul(c)
+  return c and c == "*" or c == "/"
+end
+
+local variables = {}
 
 function g.factor()
-  if peek().token == "(" then
+  local value
+
+  if g.look() == "(" then
+    g.match("(")
+    value = g.expression()
+    g.match(")")
+
+  elseif variables[g.look()] then
+    value = variables[g.look()]
     read()
-    g.expression()
-    if (not peek()) or peek().token ~= ")" then
-      die("missing ')'")
-    end
-    read()
-  elseif not peek().token:match("[a-zA-Z_]") then
-    g.ident()
+
+  elseif g.looktype() == "number" then
+    value = g.number()
+
   else
-    emit("pushi %s", g.number())
+    die("bad identifier '%s'", g.look())
   end
-end
 
-function g.multiply()
-  g.factor()
-  emit("pop r8")
-  emit("pop r9")
-  emit("mult r9, r8")
-  emit("push r8")
-end
-
-function g.divide()
-  g.factor()
-  emit("pop r8")
-  emit("pop r9")
-  emit("mult r9, r8")
-  emit("push r8")
+  return value
 end
 
 function g.term()
-  g.factor()
-  while g.mulop() do
-    local op = g.operator()
-    if op == '*' then
-      g.multiply()
-    elseif op == '/' then
-      g.divide()
+  local value = g.factor()
+
+  while is_mul(g.look()) do
+    local tok = read().token
+    if tok == "*" then
+      value = value * g.factor()
+    elseif tok == "/" then
+      value = math.floor(value / g.factor() + 0.5)
     end
   end
-end
 
-function g.add()
-  g.term()
-  emit("pop r8")
-  emit("pop r9")
-  emit("add r9, r8")
-  emit("push r8")
-end
-
-function g.subtract()
-  g.term()
-  emit("pop r8")
-  emit("pop r9")
-  emit("sub r9, r8")
-  emit("push r8")
+  return value
 end
 
 function g.expression()
-  if g.addop() then
-    emit("pushi 0")
+  local value
+  if is_add(g.look()) then
+    value = 0
   else
-    g.term()
+    value = g.term()
   end
 
-  while g.addop() do
-    local op = g.operator()
-    if op == '+' then
-      g.add()
-    elseif op == '-' then
-      g.subtract()
+  while is_add(g.look()) do
+    local tok = read().token
+    if tok == "+" then
+      value = value + g.term()
+    elseif tok == "-" then
+      value = value - g.term()
     end
   end
+
+  return value
 end
 
 function g.assignment()
   local name = g.word()
-  if g.operator() ~= "=" then
-    die("'=' expected")
+  g.match("=")
+  variables[name] = g.expression()
+end
+
+-- i/o
+function g.input()
+  g.match("in")
+  variables[g.word()] = io.read()
+end
+
+function g.output()
+  g.match("out")
+  print(variables[g.word()])
+end
+
+repeat
+  local tok = g.look()
+
+  if tok == "out" then
+    g.output()
+  elseif tok == "in" then
+    g.input()
+  else
+    g.assignment()
   end
-  g.expression()
-  emit("store %s, .%s", )
-end
 
-function g.statement()
-  g.assignment()
-  g.semicolon()
-end
-
-while peek() do
-  g.statement()
-end
+  g.match(";")
+until not g.look()
