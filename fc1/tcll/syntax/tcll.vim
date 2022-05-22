@@ -14,7 +14,7 @@ syn match tcllNumber "\<\d\+\>"
 syn match tcllNumber "\<0x\x\+\>"
 
 syn keyword tcllType int char array void
-syn keyword tcllKeyword asm fn while for if else var
+syn keyword tcllKeyword asm fn while for if else var break
 
 hi def link tcllTodo Todo
 hi def link tcllComment Comment

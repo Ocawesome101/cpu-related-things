@@ -70,7 +70,7 @@ end
 function g.operator()
   local tok = read()
   if (not tok) or tok.ttype ~= "operator" then
-    die("expected operator near '%s'", tok and tok.token or "EOF")
+    die("expected operator near '%s'", tok and tok.token or "<EOF>")
   end
   return tok.token
 end
@@ -78,7 +78,7 @@ end
 function g.word()
   local tok = read()
   if (not tok) or tok.ttype ~= "word" then
-    die("expected variable name near '%s'", tok and tok.token or "EOF")
+    die("expected variable name near '%s'", tok and tok.token or "<EOF>")
   end
   return tok.token
 end
@@ -95,10 +95,11 @@ function g.match(c)
   if g.look() == c then
     read()
   else
-    die("expected '%s' near '%s", c, g.look())
+    die("expected '%s' near '%s'", c, g.look() or "<EOF>")
   end
 end
 
+--[[
 local function is_add(c)
   return c == "+" or c == "-"
 end
@@ -106,93 +107,92 @@ end
 local function is_mul(c)
   return c and c == "*" or c == "/"
 end
+--]]
 
-local variables = {}
-
-function g.factor()
-  local value
-
-  if g.look() == "(" then
-    g.match("(")
-    value = g.expression()
-    g.match(")")
-
-  elseif variables[g.look()] then
-    value = variables[g.look()]
-    read()
-
-  elseif g.looktype() == "number" then
-    value = g.number()
-
-  else
-    die("bad identifier '%s'", g.look())
-  end
-
-  return value
-end
-
-function g.term()
-  local value = g.factor()
-
-  while is_mul(g.look()) do
-    local tok = read().token
-    if tok == "*" then
-      value = value * g.factor()
-    elseif tok == "/" then
-      value = math.floor(value / g.factor() + 0.5)
-    end
-  end
-
-  return value
+function g.other()
+  emit(read().token)
 end
 
 function g.expression()
-  local value
-  if is_add(g.look()) then
-    value = 0
-  else
-    value = g.term()
-  end
+  emit(read().token)
+end
 
-  while is_add(g.look()) do
-    local tok = read().token
-    if tok == "+" then
-      value = value + g.term()
-    elseif tok == "-" then
-      value = value - g.term()
+local terminators = {
+  ["}"] = true
+}
+
+local _lid = 0
+function g.newLabel()
+  _lid = _lid + 1
+  return ".l"..(_lid-1)
+end
+
+function g.block(label, nomatch)
+  if not nomatch then g.match("{") end
+  local look = g.look()
+  while look and not terminators[look] do
+    if look == "if" then
+      g.doif(label)
+    elseif look == "while" then
+      g.dowhile()
+    elseif look == "break" then
+      g.dobreak(label)
+    else
+      g.other()
     end
+    look = g.look()
+  end
+  if not nomatch then g.match("}") end
+end
+
+function g.boolExpression()
+end
+
+function g.condition()
+  emit("<condition>")
+end
+
+function g.doif(label)
+  g.match("if")
+  local l1 = g.newLabel()
+  local l2 = l1
+  g.condition()
+  emit("imm r9, 0x10")
+  emit("jump r9, %s", l1)
+  g.block(label)
+  if g.look() == "else" then
+    g.match("else")
+    l2 = g.newLabel()
+    emit("jump a5, %s", l2)
+    emit(l1)
+    g.block(label)
   end
 
-  return value
+  emit("%s", l2)
 end
 
-function g.assignment()
-  local name = g.word()
-  g.match("=")
-  variables[name] = g.expression()
+function g.dowhile()
+  g.match("while")
+  local l1, l2 = g.newLabel(), g.newLabel()
+  emit(l1)
+  g.condition()
+  emit("imm r9, 0x10")
+  emit("jump r9, %s", l2)
+  g.block(l2)
+  emit("jump a5, %s", l1)
+  emit(l2)
 end
 
--- i/o
-function g.input()
-  g.match("in")
-  variables[g.word()] = io.read()
-end
+-- no for-loops *yet*
 
-function g.output()
-  g.match("out")
-  print(variables[g.word()])
+function g.dobreak(label)
+  g.match("break")
+  if not label then
+    die("cannot break outside loop")
+  end
+  emit("jump a5, %s", label)
 end
 
 repeat
-  local tok = g.look()
-
-  if tok == "out" then
-    g.output()
-  elseif tok == "in" then
-    g.input()
-  else
-    g.assignment()
-  end
-
-  g.match(";")
+  g.block(nil, true)
 until not g.look()

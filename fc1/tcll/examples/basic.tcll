@@ -1,4 +1,12 @@
-x = 4;
-y = 2 + x;
-out x;
-out y;
+if {
+  b;
+  c;
+} else {
+  d;
+}
+
+while {
+  if {
+    break;
+  }
+}
