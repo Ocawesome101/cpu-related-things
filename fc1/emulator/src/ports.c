@@ -38,7 +38,7 @@ unsigned short port_read2(char port) {
   if (port > 5 || ports[port].registered == 0) {
     return 0;
   }
-  return (unsigned short)(ports[port].read() >> 8)
+  return (unsigned short)(ports[port].read() << 8)
        + (unsigned short)(ports[port].read());
 }
 
@@ -50,7 +50,7 @@ void port_write(char port, unsigned char byte) {
 
 void port_write2(char port, unsigned short bytes) {
   if (!(port > 5 || ports[port].registered == 0)) {
-    ports[port].write((unsigned char)(bytes << 8));
+    ports[port].write((unsigned char)(bytes >> 8));
     ports[port].write((unsigned char)bytes);
   }
 }

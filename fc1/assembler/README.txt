@@ -60,6 +60,9 @@ A highlighting file for [Neo]Vim is included in this tree.  To make Vim automati
 
 Available directives are:
 
+  *include "file"
+    Include another assembly source file.
+
   *offset number
     Sets the offset at which the program expects to be run.  Defaults to 0.
 

@@ -16,3 +16,5 @@ for f in $(ls); do
 done
 
 cd ../..
+
+./mkluadev.sh src/luadev/blkdev

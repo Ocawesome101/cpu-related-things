@@ -216,13 +216,22 @@ local function dw(line)
   return ret
 end
 
--- pass 0: expand macros
+-- pass 0: expand macros, *include files
 local current_macro
 local expanded_lines = {}
 
-for line in io.lines(file) do
-  expanded_lines[#expanded_lines+1] = line
+local function read_file(_file)
+  for line in io.lines(_file) do
+    local _, ftoi = line:match("%*include +(['\"])(.+)%1")
+    if ftoi then
+      read_file(ftoi)
+    else
+      expanded_lines[#expanded_lines+1] = line
+    end
+  end
 end
+
+read_file(file)
 
 local function expand_macro(words, line, i, pre)
   local name = words[1]

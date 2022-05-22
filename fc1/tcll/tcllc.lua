@@ -111,8 +111,9 @@ local function emitReturn(value)
   for _i=0, 9, 1 do
     emit("pop %s", _i)
   end
-  emit("pop r9")
-  emit("pushi", val)
+  emit("pop a5")
+  emit("pushi", value)
+  emit("jump a5, a5")
 end
 
 function g.ident()
@@ -166,8 +167,6 @@ function g.term()
       g.multiply()
     elseif op == '/' then
       g.divide()
-    else
-      die("bad operator '%s'", op)
     end
   end
 end
@@ -201,14 +200,21 @@ function g.expression()
       g.add()
     elseif op == '-' then
       g.subtract()
-    else
-      die("bad operator '%s'", op)
     end
   end
 end
 
-function g.statement()
+function g.assignment()
+  local name = g.word()
+  if g.operator() ~= "=" then
+    die("'=' expected")
+  end
   g.expression()
+  emit("store %s, .%s", )
+end
+
+function g.statement()
+  g.assignment()
   g.semicolon()
 end
 
