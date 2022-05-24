@@ -1,7 +1,7 @@
 // FC-1
 This is a reference implementation of the FC-1 architecture.
 
-Run `./build.sh` while in this directory to build the emulator and accompanying devices.
+Run `./build.sh` while in this directory to build the emulator and accompanying devices.  You will need at least GCC 11 for compilation to work.  (GCC 10 might work, but hasn't been tested.  GCC 9 does not work.)
 
 Pass -DDEVICE_SCAN_DIR=\"/some/directory\" to set where device files should go - it defaults to `./devices`.  Compiled device files are always placed in `./devices` regardless of this option.
 

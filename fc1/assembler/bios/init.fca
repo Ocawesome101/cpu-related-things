@@ -1,3 +1,43 @@
 ; initial bios setup
 
+*include "bios/macros.fca"
 
+*offset 0x4000
+
+; set up interrupts
+imm a4, .ivt
+seti
+
+.ivt
+; error for most interrupts
+*dw60 .error
+; ... except software ones
+*dw .soft_irq
+
+.irqtable
+*dw4 .func_print
+*dw4 .func_fsread
+
+.print
+  pop r0
+  imm r2, 0
+  imm r3, 4
+  .print_loop
+    idload r0, r1
+    pwrite r1, 0, 0, 0
+    compare r1, r2
+    addi r0, 1
+    jump r3, .print_loop
+  *$return0
+
+.soft_irq
+  clri
+  
+
+.error
+  clri
+  *$call1 .print .text_error
+  halt
+
+.text_error
+*dw "bios: Got unknown interrupt" 10 0

@@ -1,0 +1,14 @@
+// basic THLL example
+
+// entrypoint: declares the function to jump to on entry
+entrypoint main;
+
+var example: int;
+
+fn ret(p1: int, p2: int): int {
+  return p1;
+}
+
+fn main(): void {
+  example = ret(4, 6);
+}

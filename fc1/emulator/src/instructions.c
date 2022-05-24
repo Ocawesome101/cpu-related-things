@@ -76,7 +76,9 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
       break;
 
     case INST_JUMP:
-      if (registers_get(REG_CMP) == registers_get(src)) {
+      int _jsrc = registers_get(src);
+
+      if (registers_get(REG_CMP) & _jsrc == _jsrc) {
 #ifdef FC1_DEBUG
         printf("JUMP to %d\n", (int)value);
 #endif
@@ -86,7 +88,9 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
       break;
 
     case INST_IDJUMP:
-      if (registers_get(REG_CMP) == registers_get(src)) {
+      int _idjsrc = registers_get(src);
+
+      if (registers_get(REG_CMP) & _idjsrc == _idjsrc) {
 #ifdef FC1_DEBUG
         printf("IDJUMP to %d\n", registers_get(dest));
 #endif
@@ -96,7 +100,9 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
       break;
 
     case INST_RJUMP:
-      if (registers_get(REG_CMP) == registers_get(src)) {
+      int _rjsrc = registers_get(src);
+
+      if (registers_get(REG_CMP) & _jrsrc == _jrsrc) {
         registers_set(REG_PC, registers_get(REG_PC) + value);
         return -1;
       }

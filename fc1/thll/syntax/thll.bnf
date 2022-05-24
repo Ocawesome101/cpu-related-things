@@ -1,0 +1,31 @@
+// this is more-or-less BNF, but not really
+
+<program> ::= <entrypoint> <top-level-block>
+
+<entrypoint> ::= entrypoint <ident> ';'
+
+<top-level-block> ::= ( <declaration> | <function> )*
+
+<declaration> ::= var <ident> ':' <type> [ '=' <expression> ] ';'
+
+<expression> ::= <number> | <func-call> | <ident>
+
+<func-call> ::= <ident> '(' <f-arg-list> ')'
+
+<type> ::= int | void
+
+<function> ::= fn <ident> '(' <f-param-list> ')' ':' <type> <block>
+
+<f-param-list> ::= <ident> ':' <type> ( ',' <ident> ':' <type> )*
+
+<block> ::= '{' ( <declaration> | <assignment> | <statement> )* '}'
+
+<assignment> ::= <ident> '=' <expression> ';'
+
+<statement> ::= <return-statement> | <break-statement> |
+                <while-statement>  | <asm-statement>   |
+                <for-statement>    | <if-statement>
+
+<return-statement> ::= return [ <expression> ] ';'
+
+

@@ -1,0 +1,54 @@
+; some utility macros
+
+;$macro regs
+;$$1 r0
+;$$1 r1
+;$$1 r2
+;$$1 r3
+;$$1 r4
+;$$1 r5
+;$$1 r6
+;$$1 r7
+;$$1 r8
+;$$1 r9
+;$$1 a1
+;$$1 a2
+;$$1 a4
+;$end
+
+;$macro call0
+;$*$regs push
+;$pushi .call0_ret#
+;$jump $1
+;$.call0_ret#
+;$*$regs pop
+;$end
+
+;$macro call1
+;$*$regs push
+;$pushi .call1_ret#
+;$pushi $2
+;$jump $1
+;$.call1_ret#
+;$*$regs pop
+;$end
+
+;$macro call2
+;$*$regs push
+;$pushi .call2_ret#
+;$pushi $3
+;$pushi $2
+;$jump $1
+;$.call2_ret#
+;$*$regs pop
+;$end
+
+;$macro return0
+;$pop a0
+;$end
+
+;$macro return1
+;$pop r0
+;$pushi $1
+;$move r0, a0
+;$end
