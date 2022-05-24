@@ -102,7 +102,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
     case INST_RJUMP:
       int _rjsrc = registers_get(src);
 
-      if (registers_get(REG_CMP) & _jrsrc == _jrsrc) {
+      if (registers_get(REG_CMP) & _rjsrc == _rjsrc) {
         registers_set(REG_PC, registers_get(REG_PC) + value);
         return -1;
       }
