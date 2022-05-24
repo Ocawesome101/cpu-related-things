@@ -267,7 +267,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
 
     default:
       if (interrupts_fire(INT_ILGLINST, -1, -1) != 0) {
-        printf("illegal instruction %x\n", code);
+        printf("illegal instruction 0x%x\n", code);
         exit(1);
       }
       return -1;

@@ -11,7 +11,7 @@ fn ret(p1: int, p2: int): int {
 
 fn wchar(ch: int): void {
   asm {
-    load r9, .wchar_ch;
+//    load r9, .wchar_ch;
     pwrite r9, 0, 0, 0;
   };
 }

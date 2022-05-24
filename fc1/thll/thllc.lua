@@ -70,6 +70,19 @@ local function emitLoad(syms, name, register)
   emit("load %s, .%s_%s", register, syms[name].__stab_name, name)
 end
 
+local global_syms = {}
+-- random symbol table name generator
+local function rand_name(x)
+  if os.getenv("NOOBF") then
+    return x
+  end
+  local base = "_"
+  for _=1, 5, 1 do
+    base = base .. math.random(33, 126)
+  end
+  return base
+end
+
 function g.number()
   local tok = read()
   if (not tok) or tok.ttype ~= "number" then
@@ -129,7 +142,7 @@ function g.entrypoint()
 end
 
 function g.top_level_block()
-  local top_level_syms = {__stab_name ="__top_level_block", __funcs = {}}
+  local top_level_syms = {__stab_name = rand_name("__tlb"), __funcs = {}}
   setmetatable(top_level_syms, {__index = top_level_syms.__funcs})
 
   while true do
@@ -146,12 +159,6 @@ function g.top_level_block()
       die("invalid top-level keyword near '%s'", look)
     end
   end
-
-  for k, v in pairs(top_level_syms) do
-    if k ~= "__stab_name" and k ~= "__funcs" then
-      g.allocate(k, v)
-    end
-  end
 end
 
 function g.declaration(syms)
@@ -165,6 +172,7 @@ function g.declaration(syms)
 
   local vtype = g.type()
   syms[name] = {__stab_name = syms.__stab_name, type = vtype}
+  global_syms[syms.__stab_name.."_"..name] = syms[name]
 
   if g.look() == "=" then
     g.match("=")
@@ -246,7 +254,8 @@ function g._function(syms)
 
   g.match("(")
   -- function's own local symbol table
-  local local_stable = setmetatable({__stab_name = name}, {__index=syms})
+  local local_stable = setmetatable({__stab_name = rand_name(name)},
+    {__index=syms})
   g.f_param_list(local_stable, fdata)
   g.match(")")
   g.match(":")
@@ -261,12 +270,6 @@ function g._function(syms)
   end
 
   g.block(local_stable, fret_label)
-
-  for k, v in pairs(local_stable) do
-    if k ~= "__stab_name" then
-      g.allocate(k, v)
-    end
-  end
 
   emit(fret_label)
   if rtype ~= "void" then
@@ -291,6 +294,7 @@ function g.f_param_list(syms, fdata)
 
     fdata.args[#fdata.args+1] = {name = name, type = vtype}
     syms[name] = {__stab_name = syms.__stab_name, type = vtype}
+    global_syms[syms.__stab_name.."_"..name] = syms[name]
 
     look = g.look()
 
@@ -317,7 +321,8 @@ function g.block(syms, fr_lab)
 
   blcount = blcount + 1
   local block_syms = setmetatable({
-    __stab_name = string.format("blk%d", blcount)}, {__index = syms})
+    __stab_name = rand_name(string.format("blk%d", blcount))},
+    {__index = syms})
 
   while true do
     local look = g.look()
@@ -339,16 +344,6 @@ function g.block(syms, fr_lab)
       g.assignment(block_syms)
     end
   end
-
-  emit("jump a5, %s", l1)
-
-  for k, v in pairs(block_syms) do
-    if k ~= "__stab_name" then
-      g.allocate(k, v)
-    end
-  end
-
-  emit(l1)
 
   g.match("}")
 end
@@ -447,8 +442,14 @@ function g.asm_line(syms)
 end
 
 function g.allocate(name, vtype)
-  emit(".%s_%s", vtype.__stab_name, name)
+  emit(".%s", name)
   emit("*dw%d 0", types[vtype.type])
 end
 
 g.program()
+
+emit("halt")
+
+for k, v in pairs(global_syms) do
+  g.allocate(k, v)
+end
