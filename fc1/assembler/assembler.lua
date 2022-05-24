@@ -22,7 +22,7 @@ local instructions = {}
 
 local function split(line)
   local ret = {}
-  for word in line:gmatch("[^ ]+") do
+  for word in line:gmatch("[^ ,]+") do
     ret[#ret+1] = tonumber(word) or word
   end
   return ret
@@ -30,6 +30,10 @@ end
 
 local function into_bits(i, width)
   local bits = {}
+
+  if type(i) == "string" then
+    die("bad token '%s'", i)
+  end
 
   if width then
     for _=1, width, 1 do
@@ -316,7 +320,7 @@ local offset = 0
 for current_line, line in ipairs(expanded_lines) do
   line = line:gsub("^ +", ""):gsub(";.+", "")
 
-  if line:sub(1,1) ~= "*" then line = line:gsub(",", "") end
+  --if line:sub(1,1) ~= "*" then line = line:gsub(",", "") end
 
   if #line > 0 then
     local words = split(line)

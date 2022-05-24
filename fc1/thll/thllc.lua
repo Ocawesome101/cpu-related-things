@@ -58,7 +58,7 @@ local function emitStore(syms, name)
     die("undefined variable '%s'", name)
   end
   emit("pop r9")
-  emit("store r9, .%s_%s", syms.__stab_name, name)
+  emit("store r9, .%s_%s", syms[name].__stab_name, name)
 end
 
 -- load a variable from its label into the given register;
@@ -67,7 +67,7 @@ local function emitLoad(syms, name, register)
   if not syms[name] then
     die(debug.traceback("undefined variable '%s'"), name)
   end
-  emit("load %s, .%s_%s", register, syms.__stab_name, name)
+  emit("load %s, .%s_%s", register, syms[name].__stab_name, name)
 end
 
 function g.number()
@@ -129,8 +129,7 @@ function g.entrypoint()
 end
 
 function g.top_level_block()
-  local top_level_syms = {__stab_name ="",--__top_level_block",
-    __funcs = {}}
+  local top_level_syms = {__stab_name ="__top_level_block", __funcs = {}}
   setmetatable(top_level_syms, {__index = top_level_syms.__funcs})
 
   while true do
@@ -150,7 +149,7 @@ function g.top_level_block()
 
   for k, v in pairs(top_level_syms) do
     if k ~= "__stab_name" and k ~= "__funcs" then
-      g.allocate(top_level_syms, k, v)
+      g.allocate(k, v)
     end
   end
 end
@@ -165,7 +164,7 @@ function g.declaration(syms)
   g.match(":")
 
   local vtype = g.type()
-  syms[name] = vtype
+  syms[name] = {__stab_name = syms.__stab_name, type = vtype}
 
   if g.look() == "=" then
     g.match("=")
@@ -197,12 +196,7 @@ function g.expression(syms)
   else
     local name = g.word()
     if g.look() == "(" then
-      local ret = g.newLabel()
-      emit("pushi %s", ret)
-      g.f_arg_list(syms, syms.__funcs[name])
-      emit("jump .%s", name)
-      --emitCall(name)
-      emit(ret)
+      g.func_call(syms, name)
     else
       if not syms[name] then
         die("undefined variable '%s'", name)
@@ -211,6 +205,14 @@ function g.expression(syms)
       emit("push r9")
     end
   end
+end
+
+function g.func_call(syms, name)
+  local ret = g.newLabel()
+  emit("pushi %s", ret)
+  g.f_arg_list(syms, syms.__funcs[name])
+  emit("jump a5, .%s", name)
+  emit(ret)
 end
 
 function g.f_arg_list(syms, fdat)
@@ -244,8 +246,7 @@ function g._function(syms)
 
   g.match("(")
   -- function's own local symbol table
-  local local_stable = setmetatable({__stab_name = "",--name
-    }, {__index=syms})
+  local local_stable = setmetatable({__stab_name = name}, {__index=syms})
   g.f_param_list(local_stable, fdata)
   g.match(")")
   g.match(":")
@@ -263,7 +264,7 @@ function g._function(syms)
 
   for k, v in pairs(local_stable) do
     if k ~= "__stab_name" then
-      g.allocate(local_stable, k, v)
+      g.allocate(k, v)
     end
   end
 
@@ -289,7 +290,7 @@ function g.f_param_list(syms, fdata)
     local vtype = g.type()
 
     fdata.args[#fdata.args+1] = {name = name, type = vtype}
-    syms[name] = vtype
+    syms[name] = {__stab_name = syms.__stab_name, type = vtype}
 
     look = g.look()
 
@@ -316,8 +317,7 @@ function g.block(syms, fr_lab)
 
   blcount = blcount + 1
   local block_syms = setmetatable({
-    __stab_name = ""--string.format("blk%d", blcount)
-  }, {__index = syms})
+    __stab_name = string.format("blk%d", blcount)}, {__index = syms})
 
   while true do
     local look = g.look()
@@ -330,6 +330,11 @@ function g.block(syms, fr_lab)
     elseif statementy_things[look] then
       g.statement(block_syms, fr_lab)
 
+    elseif tokens[i+1].token == "(" then
+      local name = g.word()
+      g.func_call(block_syms, name)
+      g.match(";")
+
     else
       g.assignment(block_syms)
     end
@@ -339,7 +344,7 @@ function g.block(syms, fr_lab)
 
   for k, v in pairs(block_syms) do
     if k ~= "__stab_name" then
-      g.allocate(block_syms, k, v)
+      g.allocate(k, v)
     end
   end
 
@@ -369,6 +374,8 @@ function g.statement(syms, fret, bjmp)
     g.return_statement(syms, fret)
   elseif tok == "break" then
     g.break_statement(syms, bjmp)
+  elseif tok == "asm" then
+    g.asm_statement(syms)
   end
 end
 
@@ -387,9 +394,61 @@ function g.break_statement(_, bjmp)
   g.match(";")
 end
 
-function g.allocate(stab, name, vtype)
-  emit(".%s_%s", stab.__stab_name, name)
-  emit("*dw%d 0", types[vtype])
+function g.asm_statement(syms)
+  g.match("asm")
+  g.asm_block(syms)
+  g.match(";")
+end
+
+function g.asm_block(syms)
+  g.match("{")
+  while g.look() and g.look() ~= "}" do
+    g.asm_line(syms)
+  end
+  g.match("}")
+end
+
+local insts = {nop=true,idload=true,load=true,move=true,imm=true,
+  idstore=true,store=true,push=true,pushi=true,pop=true,compare=true,jump=true,
+  idjump=true,rjump=true,add=true,addi=true,sub=true,subi=true,mult=true,
+  multi=true,div=true,divi=true,lshift=true,lshifti=true,rshift=true,
+  rshifti=true,["not"]=true,["and"]=true,andi=true,["or"]=true,ori=true,
+  xor=true,xori=true,devid=true,pread=true,pisready=true,pwrite=true,seti=true,
+  irq=true,clri=true,halt=true}
+
+function g.asm_line(syms)
+  local look = g.look()
+  if (not look) or not insts[look] then
+    die("bad assembly instruction '%s'", look or "<EOF>")
+  end
+
+  local line = { g.word() }
+  repeat
+    look = g.look()
+    local ltype = g.looktype()
+
+    if look == "." then
+      look = look .. (read() and g.look())
+      ltype = "foo"
+    end
+
+    if ltype == "separator" and look ~= "," and look ~= ";" then
+      die("invalid assembly token '%s'", look)
+    end
+
+    if look ~= ";" then
+      read()
+      line[#line+1] = look
+    end
+  until look == ";"
+
+  g.match(";")
+  emit("%s", table.concat(line, " "))
+end
+
+function g.allocate(name, vtype)
+  emit(".%s_%s", vtype.__stab_name, name)
+  emit("*dw%d 0", types[vtype.type])
 end
 
 g.program()

@@ -23,9 +23,16 @@
 <assignment> ::= <ident> '=' <expression> ';'
 
 <statement> ::= <return-statement> | <break-statement> |
-                <while-statement>  | <asm-statement>   |
-                <for-statement>    | <if-statement>
+                <while-statement>  | <fcall-statement> |
+                <asm-statement>    | <for-statement>   |
+                <if-statement>
 
 <return-statement> ::= return [ <expression> ] ';'
 
+<break-statement> ::= break ';'
 
+<fcall-statement> ::= <func-call> ';'
+
+<asm-statement> ::= asm <asm-block> ';'
+
+<asm-block> ::= '{' ( <asm-line> )* '}'

@@ -1,0 +1,57 @@
+jump a5, .main
+.ret
+pop r9
+store r9, .ret_p2
+pop r9
+store r9, .ret_p1
+load r9, .ret_p1
+push r9
+jump a5, .l0
+jump a5, .l1
+.l1
+.ret_p1
+*dw4 0
+.ret_p2
+*dw4 0
+.l0
+pop r9
+pop r8
+push r9
+pop a5
+.wchar
+pop r9
+store r9, .wchar_ch
+load r9 , .wchar_ch
+pwrite r9 , 0 , 0 , 0
+jump a5, .l3
+.l3
+.wchar_ch
+*dw4 0
+.l2
+.main
+pushi .l6
+pushi 65
+pushi 0
+jump a5, .ret
+.l6
+pop r9
+store r9, .__top_level_block_example
+pushi .l7
+load r9, .__top_level_block_example
+push r9
+jump a5, .wchar
+.l7
+pushi .l8
+pushi .l9
+pushi 10
+pushi 2
+jump a5, .ret
+.l9
+jump a5, .wchar
+.l8
+halt
+jump a5, .l5
+.l5
+.l4
+.__top_level_block_example
+*dw4 0

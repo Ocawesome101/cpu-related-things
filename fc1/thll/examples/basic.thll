@@ -9,6 +9,16 @@ fn ret(p1: int, p2: int): int {
   return p1;
 }
 
+fn wchar(ch: int): void {
+  asm {
+    load r9, .wchar_ch;
+    pwrite r9, 0, 0, 0;
+  };
+}
+
 fn main(): void {
-  example = ret(4, 6);
+  example = ret(65, 0);
+  wchar(example);
+  wchar(ret(10, 2));
+  asm { halt; };
 }
