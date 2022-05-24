@@ -1,10 +1,10 @@
 jump a5, .main
 .ret
 pop r9
-store r9, ._96115654171_p2
+store r9, ._11012011710268_p2
 pop r9
-store r9, ._96115654171_p1
-load r9, ._96115654171_p1
+store r9, ._11012011710268_p1
+load r9, ._11012011710268_p1
 push r9
 jump a5, .l0
 .l0
@@ -14,7 +14,8 @@ push r9
 pop a5
 .wchar
 pop r9
-store r9, ._711074756108_ch
+store r9, ._121448611137_ch
+load r9 , ._121448611137_ch
 pwrite r9 , 0 , 0 , 0
 .l2
 .main
@@ -24,9 +25,9 @@ pushi 0
 jump a5, .ret
 .l6
 pop r9
-store r9, ._925510811067_example
+store r9, ._5982475147_example
 pushi .l7
-load r9, ._925510811067_example
+load r9, ._5982475147_example
 push r9
 jump a5, .wchar
 .l7
@@ -41,11 +42,11 @@ jump a5, .wchar
 halt
 .l4
 halt
-._96115654171_p2
+._11012011710268_p2
 *dw4 0
-._925510811067_example
+._5982475147_example
 *dw4 0
-._96115654171_p1
+._121448611137_ch
 *dw4 0
-._711074756108_ch
+._11012011710268_p1
 *dw4 0

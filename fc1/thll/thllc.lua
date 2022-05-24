@@ -431,6 +431,10 @@ function g.asm_line(syms)
       die("invalid assembly token '%s'", look)
     end
 
+    if syms[look] then
+      look = string.format(".%s_%s", syms[look].__stab_name, look)
+    end
+
     if look ~= ";" then
       read()
       line[#line+1] = look
