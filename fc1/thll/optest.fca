@@ -1,21 +1,17 @@
 jump a5, .main
 .ret
 pop r9
-store r9, ._6V1q8_p2
-pop r9
-store r9, ._6V1q8_p1
-load r9, ._6V1q8_p1
-push r9
+store r9, ._b1NsX_p2
 jump a5, .l0
 .l0
 pop r9
 pop r8
 push r9
-idjump a5, r8
+pop a5
 .wchar
 pop r9
-store r9, ._Ij6ko_ch
-load r9 , ._Ij6ko_ch
+store r9, ._97p0v_ch
+load r9 , ._97p0v_ch
 pwrite r9 , 0 , 0 , 0
 .l1
 .main
@@ -25,9 +21,9 @@ pushi 0
 jump a5, .ret
 .l3
 pop r9
-store r9, ._6Sg4f_example
+store r9, ._lPTBr_example
 pushi .l4
-load r9, ._6Sg4f_example
+load r9, ._lPTBr_example
 push r9
 jump a5, .wchar
 .l4
@@ -41,11 +37,12 @@ jump a5, .wchar
 .l5
 .l2
 halt
-._Ij6ko_ch
+._lPTBr_example
 *dw4 0
-._6V1q8_p1
+._97p0v_ch
 *dw4 0
-._6V1q8_p2
+._b1NsX_p2
 *dw4 0
-._6Sg4f_example
+._b1NsX_p1
 *dw4 0
+

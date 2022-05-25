@@ -2,6 +2,9 @@
 
 #include "memory.h"
 #include "mmio.h"
+#ifdef FC1_DEBUG
+#include <stdio.h>
+#endif
 
 unsigned char memory[MEMORY_SIZE];
 

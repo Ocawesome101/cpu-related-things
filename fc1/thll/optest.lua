@@ -2,11 +2,6 @@ jump a5, .main
 .ret
 pop r9
 store r9, ._6V1q8_p2
-pop r9
-store r9, ._6V1q8_p1
-load r9, ._6V1q8_p1
-push r9
-jump a5, .l0
 .l0
 pop r9
 pop r8
@@ -14,8 +9,6 @@ push r9
 idjump a5, r8
 .wchar
 pop r9
-store r9, ._Ij6ko_ch
-load r9 , ._Ij6ko_ch
 pwrite r9 , 0 , 0 , 0
 .l1
 .main
@@ -49,3 +42,4 @@ halt
 *dw4 0
 ._6Sg4f_example
 *dw4 0
+

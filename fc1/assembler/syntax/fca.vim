@@ -12,7 +12,7 @@ syn match fcaMacro ";\$"
 syn match fcaMacroExpand "\*\$[^ ]*"
 syn keyword fcaMacroBounds macro
 syn keyword fcaMacroBounds end
-syn match fcaMacroArgument "\$\d+"
+syn match fcaMacroArgument "\$\d*"
 syn match fcaMacroArgument "\$\$"
 syn match fcaMacroArgument "\$@"
 syn match fcaMacroID "\#"

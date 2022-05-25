@@ -1,0 +1,40 @@
+## Nano syntax highlighting for FC-1 assembly.
+
+syntax fca "\.fca$"
+magic "FC-1 assembly"
+comment ";"
+
+# Macros
+color brightmagenta "\<(macro|end)\>"
+color brightmagenta ";\$"
+color brightmagenta "\*\$[^ ]*"
+color red "\#"
+color red "\$[0-9]+"
+color red "\$\$"
+color red "\$@"
+
+color yellow "[\*,]"
+
+# Directives
+color brightmagenta "\<(dw|offset)\>"
+color brightmagenta "dw[0-9]*"
+
+# Labels
+color cyan "\.[a-zA-Z0-9_-]+"
+
+# Registers
+color magenta "r[0-9]"
+color brightmagenta "a[0-5]"
+
+# Numbers
+color red "\<[0-9]+\>"
+color red "\<0x[0-9a-fA-F]+\>"
+
+# Strings
+color red ""([^"\]|\\.)*"|'([^'\]|\\.)*'"
+
+# Instructions
+color brightyellow "\<(nop|idload|load|move|imm|idstore|store|push|pushi|pop|compare|jump|idjump|rjump|add|addi|sub|subi|mult|multi|div|divi|lshift|lshifti|rshift|rshifti|not|and|andi|or|ori|xor|xori|devid|pread|pisready|pwrite|seti|irq|clri|halt)\>"
+
+# Comments
+color brightblue ";[^\$].*$"

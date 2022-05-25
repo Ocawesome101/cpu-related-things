@@ -71,6 +71,7 @@ local function emitLoad(syms, name, register)
 end
 
 local global_syms = {}
+
 -- random symbol table name generator
 local function rand_name(x)
   if os.getenv("NOOBF") then
@@ -78,7 +79,10 @@ local function rand_name(x)
   end
   local base = "_"
   for _=1, 5, 1 do
-    base = base .. math.random(33, 126)
+    local n = math.random(0, 2)
+    base = base .. string.char(n == 0 and math.random(65, 90) or
+      n == 1 and math.random(97, 122) or
+      n == 2 and math.random(48, 57))
   end
   return base
 end
@@ -275,10 +279,14 @@ function g._function(syms)
   if rtype ~= "void" then
     -- the top value on the stack will always be the return value, if there
     -- is one.
+    -- pop return value
     emit("pop r9")
+    -- pop return address
     emit("pop r8")
+    -- push return value
     emit("push r9")
-    emit("pop a5")
+    -- jump!
+    emit("idjump a5, r8")
   end
 end
 
@@ -316,8 +324,6 @@ local statementy_things = {["if"]=true, ["for"]=true, ["while"]=true,
 
 function g.block(syms, fr_lab)
   g.match("{")
-
-  local l1 = g.newLabel()
 
   blcount = blcount + 1
   local block_syms = setmetatable({
