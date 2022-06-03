@@ -1,0 +1,27 @@
+entrypoint iftest;
+
+fn pwrite(c: int): void {
+  asm {
+    load r9, c;
+    pwrite r9, 0, 0, 0;
+  };
+  return;
+}
+
+fn iftest(): void {
+  var cond: int = 0;
+  if (cond) {
+    pwrite(65);
+  } else {
+    pwrite(66);
+  };
+
+  if (cond == 1) {
+    pwrite(65);
+  } else {
+    pwrite(66);
+  };
+  pwrite(10);
+
+  asm { halt; };
+}

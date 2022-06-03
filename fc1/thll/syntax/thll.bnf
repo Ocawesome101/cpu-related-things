@@ -46,3 +46,5 @@
 <asm-statement> ::= asm <asm-block> ';'
 
 <asm-block> ::= '{' ( <asm-line> )* '}'
+
+<if-statement> ::= if <expression> <block> [ else <block> ] ';'

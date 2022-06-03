@@ -92,6 +92,17 @@ local function emitLoad(syms, name, register)
   emit("load %s, .%s_%s", register, syms[name].__stab_name, name)
 end
 
+-- check if the top of the stack is 0, and if it isn't then
+-- jump to the given label
+local function emitUntrueJump(label)
+  emit("imm r7, 0x10")
+  emit("imm r8, 0")
+  emit("pop r9")
+  emit("compare r8, r9")
+  emit("xori a5, 0x10")
+  emit("jump r7, %s", label)
+end
+
 local global_syms = {}
 
 -- random symbol table name generator
@@ -260,7 +271,7 @@ function g.expression(syms)
 end
 
 function g.term(syms)
-  g.factor(syms)
+  g.bitexp(syms)
 
   while is_mul(g.look()) do
     local tok = read().token
@@ -281,7 +292,7 @@ function g.bitexp(syms)
 
   while is_bit(g.look()) do
     local tok = read().token
-    g.bitexp(syms)
+    g.boolexp(syms)
     emit("pop r8")
     emit("pop r9")
     if tok == ">>" then
@@ -333,7 +344,7 @@ end
 function g.factor(syms)
   if g.look() == "(" then
     g.match("(")
-    g.expression()
+    g.expression(syms)
     g.match(")")
   elseif tonumber(g.look()) then
     emit("pushi %d", g.number())
@@ -514,6 +525,8 @@ function g.statement(syms, fret, bjmp)
     g.while_statement(syms, fret)
   elseif tok == "asm" then
     g.asm_statement(syms)
+  elseif tok == "if" then
+    g.if_statement(syms, fret, bjmp)
   end
 end
 
@@ -540,13 +553,8 @@ function g.while_statement(syms, fret)
   local loop = g.newLabel()
   emit(loop)
   g.expression(syms)
-  emit("imm r7, 0x10")
-  emit("imm r8, 0")
-  emit("pop r9")
-  emit("compare r8, r9")
-  emit("xori a5, 0x10")
   local bjmp = g.newLabel()
-  emit("jump r7, %s", bjmp)
+  emitUntrueJump(bjmp)
   g.block(syms, fret, bjmp)
   emit("jump a5, %s", loop)
   emit(bjmp)
@@ -565,6 +573,23 @@ function g.asm_block(syms)
     g.asm_line(syms)
   end
   g.match("}")
+end
+
+function g.if_statement(syms, fret, bjmp)
+  g.match("if")
+  g.expression(syms)
+  local ifelse = g.newLabel()
+  local endif = g.newLabel()
+  emitUntrueJump(ifelse)
+  g.block(syms, fret, bjmp)
+  emit("jump a5, %s", endif)
+  emit(ifelse)
+  if g.look() == "else" then
+    g.match("else")
+    g.block(syms, fret, bjmp)
+  end
+  emit(endif)
+  g.match(";")
 end
 
 local insts = {nop=true,idload=true,load=true,move=true,imm=true,
