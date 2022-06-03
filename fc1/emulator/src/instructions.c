@@ -12,6 +12,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef FC1_DEBUG
+#define FC1_DEBUG_JUMP
+#endif
+
 int instructions_execute(unsigned char code, char src, char dest, int value) {
   char port;
   int tmp, nbytes;
@@ -79,7 +83,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
       tmp = registers_get(src);
 
       if ((registers_get(REG_CMP) & tmp) == tmp) {
-#ifdef FC1_DEBUG
+#ifdef FC1_DEBUG_JUMP
         printf("JUMP to %d\n", (int)value);
 #endif
         registers_set(REG_PC, (int)value);

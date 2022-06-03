@@ -8,7 +8,11 @@
 
 <declaration> ::= var <ident> ':' <type> [ '=' <expression> ] ';'
 
-<expression> ::= <number> | <func-call> | <ident>
+<expression> ::= <term> [ <addop> <term> ]*
+
+<term> ::= <factor> [ <mulop> <factor> ]*
+
+<factor> ::= <number> | <func-call> | <ident>
 
 <func-call> ::= <ident> '(' <f-arg-list> ')'
 

@@ -6,7 +6,7 @@
 ;$.print_loop_$1
 ;$idload r6, r7
 ;$pwrite r7, 0, 0, 0
-;$compare r7, 8
+;$compare r7, r9
 ;$addi r6, 1
 ;$jump r9, .print_loop_$1
 ;$end

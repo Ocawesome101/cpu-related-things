@@ -7,13 +7,35 @@ local syntaxfunc = require("thll.syntax").new("thll/thll.lua")
 
 local args = table.pack(...)
 
+local offset = 0x4000
+
 local function die(f, ...)
   io.stderr:write(string.format(f.."\n", ...))
   os.exit(1)
 end
 
+while true do
+  if args[1] == "-h" then
+    args = {}
+    break
+  elseif args[1] == "-offset" then
+    table.remove(args, 1)
+    offset = tonumber(table.remove(args, 1))
+    if not offset then
+      die("option '-offset' expects a number (pass -h for help)")
+    end
+  else
+    break
+  end
+end
+
 if #args == 0 then
-  die("usage: thllc SRCFILE [OUTFILE]")
+  die("usage: thllc [options] SRCFILE [OUTFILE]\n\z
+  options:\n  \z
+  -offset NUMBER  sets the program offset (default 0x4000)\n  \z
+  -h              show this help message\n\z
+  outputs FC-1 assembly (NOT bytecode).\n\z
+  copyright (c) 2022 Ocawesome101 under the GPLv3.")
 end
 
 local function readfile(f)
@@ -44,11 +66,11 @@ local function read()
   return tokens[i - 1]
 end
 
--- grammar definitions
 local g = {}
 
+local out_text = ""
 local function emit(s, ...)
-  io.write(string.format(s.."\n", ...))
+  out_text = out_text .. string.format(s.."\n", ...)
 end
 
 -- store a variable from the stack into 'name', which must
@@ -202,7 +224,57 @@ function g.type()
   end
 end
 
+local function is_add(c)
+  return c == "+" or c == "-"
+end
+
+local function is_mul(c)
+  return c == "*" or c == "/"
+end
+
 function g.expression(syms)
+  g.term()
+
+  while is_add(g.look()) do
+    local tok = read().token
+    if tok == "+" then
+      g.term(syms)
+      emit("pop r8")
+      emit("pop r9")
+      emit("add r8, r9")
+      emit("push r9")
+    elseif tok == "-" then
+      g.term(syms)
+      emit("pop r9")
+      emit("pop r8")
+      emit("sub r8, r9")
+      emit("push r9")
+    end
+  end
+end
+
+function g.term(syms)
+  g.factor(syms)
+
+  while is_mul(g.look()) do
+    local tok = read().token
+    if tok == "*" then
+      g.factor(syms)
+      emit("pop r8")
+      emit("pop r9")
+      emit("mult r8, r9")
+      emit("push r9")
+    elseif tok == "/" then
+      g.factor(syms)
+      emit("pop r9")
+      emit("pop r8")
+      emit("div r8, r9")
+      emit("push r9")
+    end
+  end
+end
+
+function g.factor(syms)
   if tonumber(g.look()) then
     emit("pushi %d", g.number())
   else
@@ -287,6 +359,9 @@ function g._function(syms)
     emit("push r9")
     -- jump!
     emit("idjump a5, r8")
+  else
+    emit("pop r9")
+    emit("idjump a5, r9")
   end
 end
 
@@ -456,10 +531,17 @@ function g.allocate(name, vtype)
   emit("*dw%d 0", types[vtype.type])
 end
 
+emit("*offset %d", offset)
 g.program()
-
 emit("halt")
 
 for k, v in pairs(global_syms) do
   g.allocate(k, v)
 end
+
+local out = io.stdout
+if args[2] then
+  out = assert(io.open(args[2], "w"))
+end
+out:write(out_text)
+out:close()

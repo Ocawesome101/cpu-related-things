@@ -8,7 +8,7 @@
 0x04  move      1 4 4
 0x05  imm       4 4X 4 24
 0x06  idstore   1 4 4 
-0x07  store     4 4X 4 24
+0x07  store     4 4 4X 24
 0x08  push      1 4 4X
 0x09  pushi     4 4X 4X 24
 0x0A  pop       1 4X 4

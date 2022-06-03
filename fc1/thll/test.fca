@@ -1,10 +1,11 @@
+*offset 16384
 jump a5, .main
 .ret
 pop r9
-store r9, ._6V1q8_p2
+store r9, ._1vdW3_p2
 pop r9
-store r9, ._6V1q8_p1
-load r9, ._6V1q8_p1
+store r9, ._1vdW3_p1
+load r9, ._1vdW3_p1
 push r9
 jump a5, .l0
 .l0
@@ -14,10 +15,13 @@ push r9
 idjump a5, r8
 .wchar
 pop r9
-store r9, ._Ij6ko_ch
-load r9 , ._Ij6ko_ch
+store r9, ._hiI2g_ch
+load r9 , ._hiI2g_ch
 pwrite r9 , 0 , 0 , 0
+jump a5, .l1
 .l1
+pop r9
+idjump a5, r9
 .main
 pushi .l3
 pushi 65
@@ -25,9 +29,9 @@ pushi 0
 jump a5, .ret
 .l3
 pop r9
-store r9, ._6Sg4f_example
+store r9, ._4SX2O_example
 pushi .l4
-load r9, ._6Sg4f_example
+load r9, ._4SX2O_example
 push r9
 jump a5, .wchar
 .l4
@@ -39,13 +43,16 @@ jump a5, .ret
 .l6
 jump a5, .wchar
 .l5
-.l2
 halt
-._Ij6ko_ch
+.l2
+pop r9
+idjump a5, r9
+halt
+._hiI2g_ch
 *dw4 0
-._6V1q8_p1
+._1vdW3_p1
 *dw4 0
-._6V1q8_p2
+._1vdW3_p2
 *dw4 0
-._6Sg4f_example
+._4SX2O_example
 *dw4 0

@@ -14,10 +14,14 @@ fn wchar(ch: int): void {
     load r9, ch;
     pwrite r9, 0, 0, 0;
   };
+  return;
 }
 
 fn main(): void {
   example = ret(65, 0);
   wchar(example);
   wchar(ret(10, 2));
+  asm {
+    halt;
+  };
 }
