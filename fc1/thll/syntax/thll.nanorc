@@ -1,0 +1,15 @@
+## Nano syntax highlighting for THLL
+
+syntax thll "\.thll$"
+magic "Terrible High-Level Language"
+comment "//"
+
+color brightyellow "[@\$=\+;!<>&~\^:,\*/\-|]"
+
+color red "\<[0-9]+\>"
+color red "\<0x[0-9a-fA-F]+\>"
+
+color green "\<(void|int)\>"
+color brightyellow "\<(asm|fn|while|for|if|else|var|break|entrypoint|return)\>"
+
+color brightblue "//.*$"
