@@ -317,8 +317,8 @@ function g.boolexp(syms)
   while is_bool(g.look()) do
     local tok = read().token
     g.factor(syms)
-    emit("pop r8")
     emit("pop r9")
+    emit("pop r8")
     emit("compare r8, r9")
     if tok == "==" then
       emit("imm r7, 0x10")
@@ -494,6 +494,7 @@ function g.block(syms, fr_lab, br_lab)
 
     else
       g.assignment(block_syms)
+      g.match(";")
     end
   end
 
@@ -511,8 +512,6 @@ function g.assignment(syms)
   g.expression(syms)
 
   emitStore(syms, name)
-
-  g.match(";")
 end
 
 function g.statement(syms, fret, bjmp)
@@ -525,6 +524,8 @@ function g.statement(syms, fret, bjmp)
     g.while_statement(syms, fret)
   elseif tok == "asm" then
     g.asm_statement(syms)
+  elseif tok == "for" then
+    g.for_statement(syms, fret)
   elseif tok == "if" then
     g.if_statement(syms, fret, bjmp)
   end
@@ -573,6 +574,31 @@ function g.asm_block(syms)
     g.asm_line(syms)
   end
   g.match("}")
+end
+
+function g.for_statement(syms, fret)
+  g.match("for")
+  g.match("(")
+  if g.look() == "var" then
+    g.declaration(syms)
+  else
+    g.assignment(syms)
+    g.match(";")
+  end
+
+  local loop, bjmp = g.newLabel(), g.newLabel()
+  emit(loop)
+  g.expression(syms)
+  g.match(";")
+
+  emitUntrueJump(bjmp)
+
+  g.assignment(syms)
+  g.match(")")
+
+  g.block(syms, fret, bjmp)
+  emit("jump a5, %s", loop)
+  emit(bjmp)
 end
 
 function g.if_statement(syms, fret, bjmp)

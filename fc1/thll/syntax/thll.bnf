@@ -43,6 +43,11 @@
 
 <fcall-statement> ::= <func-call> ';'
 
+<for-statement> ::= for '('
+  ( <declaration> | <assignment> )
+  <expression> ';'
+  <assignment> ')' <block> ';'
+
 <asm-statement> ::= asm <asm-block> ';'
 
 <asm-block> ::= '{' ( <asm-line> )* '}'

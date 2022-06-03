@@ -1,78 +1,91 @@
 *offset 16384
-jump a5, .iftest
+jump a5, .fort
 .pwrite
 pop r9
-store r9, ._d4dcL_c
-load r9 , ._d4dcL_c
+store r9, ._0Eqqh_c
+load r9 , ._0Eqqh_c
 pwrite r9 , 0 , 0 , 0
 jump a5, .l0
 .l0
 pop r9
 idjump a5, r9
-.iftest
+.fort
 pushi 0
 pop r9
-store r9, ._9oKY6_cond
-load r9, ._9oKY6_cond
+store r9, ._qgw7q_i
+pushi .l2
+pushi 65
+load r9, ._qgw7q_i
+push r9
+pushi 10
+pop r9
+pop r8
+compare r8, r9
+imm r7, 0x8
+jump r7, .l3
+imm r9, 1
+jump a5, .l4
+.l3
+imm r9, 0
+.l4
+push r9
+pop r8
+pop r9
+add r8, r9
+push r9
+jump a5, .pwrite
+.l2
+pushi 0
+pop r9
+store r9, ._qgw7q_i
+.l5
+load r9, ._qgw7q_i
+push r9
+pushi 10
+pop r9
+pop r8
+compare r8, r9
+imm r7, 0x8
+jump r7, .l7
+imm r9, 1
+jump a5, .l8
+.l7
+imm r9, 0
+.l8
 push r9
 imm r7, 0x10
 imm r8, 0
 pop r9
 compare r8, r9
 xori a5, 0x10
-jump r7, .l2
-pushi .l4
-pushi 65
-jump a5, .pwrite
-.l4
-jump a5, .l3
-.l2
-pushi .l5
-pushi 66
-jump a5, .pwrite
-.l5
-.l3
-load r9, ._9oKY6_cond
+jump r7, .l6
+load r9, ._qgw7q_i
 push r9
 pushi 1
 pop r8
 pop r9
-compare r8, r9
-imm r7, 0x10
-jump r7, .l6
-imm r9, 1
-jump a5, .l7
-.l6
-imm r9, 0
-.l7
+add r8, r9
 push r9
-imm r7, 0x10
-imm r8, 0
 pop r9
-compare r8, r9
-xori a5, 0x10
-jump r7, .l8
-pushi .l10
+store r9, ._qgw7q_i
+pushi .l9
 pushi 65
+load r9, ._qgw7q_i
+push r9
+pop r8
+pop r9
+add r8, r9
+push r9
 jump a5, .pwrite
-.l10
-jump a5, .l9
-.l8
-pushi .l11
-pushi 66
-jump a5, .pwrite
-.l11
 .l9
-pushi .l12
-pushi 10
-jump a5, .pwrite
-.l12
+jump a5, .l5
+.l6
 halt
 .l1
 pop r9
 idjump a5, r9
 halt
-._9oKY6_cond
+._qgw7q_i
 *dw4 0
-._d4dcL_c
+._0Eqqh_c
 *dw4 0

@@ -1,0 +1,18 @@
+entrypoint fort;
+
+fn pwrite(c: int): void {
+  asm {
+    load r9, c;
+    pwrite r9, 0, 0, 0;
+  };
+  return;
+}
+
+fn fort(): void {
+  var i: int = 0;
+  pwrite(65 + (i < 10));
+  for (i = 0; i < 10; i = i + 1) {
+    pwrite(65 + i);
+  }
+  asm { halt; };
+}
