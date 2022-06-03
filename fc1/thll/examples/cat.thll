@@ -1,0 +1,26 @@
+// "cat" - echo input to output
+
+entrypoint cat;
+
+fn pwrite(c: int): void {
+  asm {
+    load r9, c;
+    pwrite r9, 0, 0, 0;
+  };
+  return;
+}
+
+fn pread(): int {
+  var ret: int;
+  asm {
+    pread r9, 0, 0, 0;
+    store r9, ret;
+  };
+  return ret;
+}
+
+fn cat(): void {
+  while (0) {
+    pwrite(pread());
+  };
+}

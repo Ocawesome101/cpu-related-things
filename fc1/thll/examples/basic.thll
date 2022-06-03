@@ -18,9 +18,11 @@ fn wchar(ch: int): void {
 }
 
 fn main(): void {
-  example = ret(65, 0);
-  wchar(example);
-  wchar(130 / 2);
+  while (0) {
+    example = ret(65, 0);
+    wchar(example);
+    wchar(20 / 2);
+  };
   asm {
     halt;
   };

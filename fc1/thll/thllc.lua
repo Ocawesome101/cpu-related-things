@@ -232,24 +232,30 @@ local function is_mul(c)
   return c == "*" or c == "/"
 end
 
+local function is_bool(c)
+  return c == "==" or c == ">" or c == "<" or c == "!="
+end
+
+-- in order: rshift, lshift, band, bor, bxor
+local function is_bit(c)
+  return c == ">>" or c == "<<" or c == "&" or c == "|" or c == "^"
+end
+
 function g.expression(syms)
   g.term(syms)
 
   while is_add(g.look()) do
     local tok = read().token
+    g.term(syms)
+    emit("pop r8")
+    emit("pop r9")
     if tok == "+" then
-      g.term(syms)
-      emit("pop r8")
-      emit("pop r9")
       emit("add r8, r9")
-      emit("push r9")
     elseif tok == "-" then
       g.term(syms)
-      emit("pop r8")
-      emit("pop r9")
       emit("sub r8, r9")
-      emit("push r9")
     end
+    emit("push r9")
   end
 end
 
@@ -258,19 +264,69 @@ function g.term(syms)
 
   while is_mul(g.look()) do
     local tok = read().token
+    g.bitexp(syms)
+    emit("pop r8")
+    emit("pop r9")
     if tok == "*" then
-      g.factor(syms)
-      emit("pop r8")
-      emit("pop r9")
       emit("mult r8, r9")
-      emit("push r9")
     elseif tok == "/" then
-      g.factor(syms)
-      emit("pop r8")
-      emit("pop r9")
       emit("div r8, r9")
-      emit("push r9")
     end
+    emit("push r9")
+  end
+end
+
+function g.bitexp(syms)
+  g.boolexp(syms)
+
+  while is_bit(g.look()) do
+    local tok = read().token
+    g.bitexp(syms)
+    emit("pop r8")
+    emit("pop r9")
+    if tok == ">>" then
+      emit("rshift r8, r9")
+    elseif tok == "<<" then
+      emit("lshift r8, r9")
+    elseif tok == "&" then
+      emit("and r8, r9")
+    elseif tok == "|" then
+      emit("or r8, r9")
+    elseif tok == "^" then
+      emit("xor r8, r9")
+    end
+    emit("push r9")
+  end
+end
+
+-- TRUE is 0, FALSE is 1
+function g.boolexp(syms)
+  g.factor(syms)
+
+  while is_bool(g.look()) do
+    local tok = read().token
+    g.factor(syms)
+    emit("pop r8")
+    emit("pop r9")
+    emit("compare r8, r9")
+    if tok == "==" then
+      emit("imm r7, 0x10")
+    elseif tok == ">" then
+      emit("imm r7, 0x4")
+    elseif tok == "<" then
+      emit("imm r7, 0x8")
+    elseif tok == "!=" then
+      emit("xori a5, 0x10")
+      emit("imm r7, 0x10")
+    end
+    local l1, l2 = g.newLabel(), g.newLabel()
+    emit("jump r7, %s", l1)
+    emit("imm r9, 1")
+    emit("jump a5, %s", l2)
+    emit(l1)
+    emit("imm r9, 0")
+    emit(l2)
+    emit("push r9")
   end
 end
 
@@ -401,7 +457,7 @@ local blcount = 0
 local statementy_things = {["if"]=true, ["for"]=true, ["while"]=true,
   ["return"]=true, ["break"]=true, ["asm"]=true,}
 
-function g.block(syms, fr_lab)
+function g.block(syms, fr_lab, br_lab)
   g.match("{")
 
   blcount = blcount + 1
@@ -418,7 +474,7 @@ function g.block(syms, fr_lab)
       g.declaration(block_syms)
 
     elseif statementy_things[look] then
-      g.statement(block_syms, fr_lab)
+      g.statement(block_syms, fr_lab, br_lab)
 
     elseif tokens[i+1].token == "(" then
       local name = g.word()
@@ -454,6 +510,8 @@ function g.statement(syms, fret, bjmp)
     g.return_statement(syms, fret)
   elseif tok == "break" then
     g.break_statement(syms, bjmp)
+  elseif tok == "while" then
+    g.while_statement(syms, fret)
   elseif tok == "asm" then
     g.asm_statement(syms)
   end
@@ -469,8 +527,29 @@ function g.return_statement(syms, fret)
 end
 
 function g.break_statement(_, bjmp)
+  if not bjmp then
+    die("attempt to 'break' outside of loop")
+  end
   g.match("break")
   emit("jump a5, %s", bjmp)
+  g.match(";")
+end
+
+function g.while_statement(syms, fret)
+  g.match("while")
+  local loop = g.newLabel()
+  emit(loop)
+  g.expression(syms)
+  emit("imm r7, 0x10")
+  emit("imm r8, 0")
+  emit("pop r9")
+  emit("compare r8, r9")
+  emit("xori a5, 0x10")
+  local bjmp = g.newLabel()
+  emit("jump r7, %s", bjmp)
+  g.block(syms, fret, bjmp)
+  emit("jump a5, %s", loop)
+  emit(bjmp)
   g.match(";")
 end
 

@@ -10,9 +10,13 @@
 
 <expression> ::= <term> [ <addop> <term> ]*
 
-<term> ::= <factor> [ <mulop> <factor> ]*
+  <term> ::= <bitexp> [ <mulop> <bitexp> ]*
 
-<factor> ::= <number> | <func-call> | <ident> | '(' <expression> ')'
+  <bitexp> ::= <boolexp> [ <bitop> <boolexp> ]*
+
+  <boolexp> ::= <factor> [ <boolop> <factor> ]*
+
+  <factor> ::= <number> | <func-call> | <ident> | '(' <expression> ')'
 
 <func-call> ::= <ident> '(' <f-arg-list> ')'
 
@@ -34,6 +38,8 @@
 <return-statement> ::= return [ <expression> ] ';'
 
 <break-statement> ::= break ';'
+
+<while-statement> ::= while <expression> <block> ';'
 
 <fcall-statement> ::= <func-call> ';'
 
