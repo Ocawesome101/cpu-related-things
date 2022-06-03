@@ -233,7 +233,7 @@ local function is_mul(c)
 end
 
 function g.expression(syms)
-  g.term()
+  g.term(syms)
 
   while is_add(g.look()) do
     local tok = read().token
