@@ -65,7 +65,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
 
     case INST_COMPARE:
       int flags = 0;
-      unsigned char sval = registers_get(src), dval = registers_get(dest);
+      int sval = (int)registers_get(src), dval = (int)registers_get(dest);
 #ifdef FC1_DEBUG
       printf("compare sval=%d, dval=%d\n", sval, dval);
 #endif

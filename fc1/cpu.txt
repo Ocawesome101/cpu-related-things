@@ -53,14 +53,14 @@ lshift    0001100 0 DEST <<= SRC
 lshifti   0001100 1 DEST <<= VALUE
 rshift    0001101 0 DEST >>= SRC
 rshifti   0001101 1 DEST >>= VALUE
-not       0001110 0 DEST not= DEST
+not       0001110 0 DEST ~= DEST
 --------- 0001110 1 illegal instruction
 and       0001111 0 DEST &= SRC
 andi      0001111 1 DEST &= VALUE
 or        0010000 0 DEST |= SRC
 ori       0010000 1 DEST |= VALUE
-xor       0010001 0 DEST ~= SRC
-xori      0010001 1 DEST ~= VALUE
+xor       0010001 0 DEST ^= SRC
+xori      0010001 1 DEST ^= VALUE
 == Port I/O ==
 devid     0010010 0 Request the device ID of the device attached to the port stored in the SRC register
 pread     0010010 1 Read into DEST, with extra parameters in VALUE (below)
@@ -94,11 +94,12 @@ A3 | Pointer to the in-memory segment descriptor table (see below)
 A4 | Pointer to the interrupt vector table
 A5 | Result of the 'compare' instruction (flag register)
     bitmap:
-        0 | carry
-        1 | greater
-        2 | less
-        3 | equal
-    4..23 | unused, always 0
+        0 | overflow
+        1 | underflow
+        2 | greater
+        3 | less
+        4 | equal
+    5..23 | unused, always 0
 
 SEGMENT DESCRIPTOR TABLE
 ---------------------------
