@@ -245,8 +245,8 @@ function g.expression(syms)
       emit("push r9")
     elseif tok == "-" then
       g.term(syms)
-      emit("pop r9")
       emit("pop r8")
+      emit("pop r9")
       emit("sub r8, r9")
       emit("push r9")
     end
@@ -266,8 +266,8 @@ function g.term(syms)
       emit("push r9")
     elseif tok == "/" then
       g.factor(syms)
-      emit("pop r9")
       emit("pop r8")
+      emit("pop r9")
       emit("div r8, r9")
       emit("push r9")
     end

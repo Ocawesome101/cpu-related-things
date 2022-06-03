@@ -20,7 +20,7 @@ fn wchar(ch: int): void {
 fn main(): void {
   example = ret(65, 0);
   wchar(example);
-  wchar(ret(10, 2) + 55);
+  wchar(130 / 2);
   asm {
     halt;
   };
