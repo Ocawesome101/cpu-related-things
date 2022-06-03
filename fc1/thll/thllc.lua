@@ -275,7 +275,11 @@ function g.term(syms)
 end
 
 function g.factor(syms)
-  if tonumber(g.look()) then
+  if g.look() == "(" then
+    g.match("(")
+    g.expression()
+    g.match(")")
+  elseif tonumber(g.look()) then
     emit("pushi %d", g.number())
   else
     local name = g.word()

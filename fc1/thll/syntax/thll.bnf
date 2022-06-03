@@ -12,7 +12,7 @@
 
 <term> ::= <factor> [ <mulop> <factor> ]*
 
-<factor> ::= <number> | <func-call> | <ident>
+<factor> ::= <number> | <func-call> | <ident> | '(' <expression> ')'
 
 <func-call> ::= <ident> '(' <f-arg-list> ')'
 
