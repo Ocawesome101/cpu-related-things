@@ -14,6 +14,7 @@
 
 #ifdef FC1_DEBUG
 #define FC1_DEBUG_JUMP
+#define FC1_DEBUG_COMPARE
 #endif
 
 int instructions_execute(unsigned char code, char src, char dest, int value) {
@@ -66,7 +67,7 @@ int instructions_execute(unsigned char code, char src, char dest, int value) {
     case INST_COMPARE:
       int flags = 0;
       int sval = (int)registers_get(src), dval = (int)registers_get(dest);
-#ifdef FC1_DEBUG
+#ifdef FC1_DEBUG_COMPARE
       printf("compare sval=%d, dval=%d\n", sval, dval);
 #endif
       if (sval > dval)
