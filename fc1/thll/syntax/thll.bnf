@@ -8,19 +8,21 @@
 
 <declaration> ::= var <ident> ':' <type> [ '=' <expression> ] ';'
 
+
 <expression> ::= <term> [ <addop> <term> ]*
 
-  <term> ::= <bitexp> [ <mulop> <bitexp> ]*
+<term> ::= <bitexp> [ <mulop> <bitexp> ]*
 
-  <bitexp> ::= <boolexp> [ <bitop> <boolexp> ]*
+<bitexp> ::= <boolexp> [ <bitop> <boolexp> ]*
 
-  <boolexp> ::= <factor> [ <boolop> <factor> ]*
+<boolexp> ::= <factor> [ <boolop> <factor> ]*
 
-  <factor> ::= <number> | <func-call> | <ident> | '(' <expression> ')'
+<factor> ::= <number> | <func-call> | <ident> | '(' <expression> ')'
+
 
 <func-call> ::= <ident> '(' <f-arg-list> ')'
 
-<type> ::= int | void
+<type> ::= [ '@' ] ( int | void )
 
 <function> ::= fn <ident> '(' <f-param-list> ')' ':' <type> <block>
 

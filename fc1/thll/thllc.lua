@@ -73,16 +73,6 @@ local function emit(s, ...)
   out_text = out_text .. string.format(s.."\n", ...)
 end
 
--- store a variable from the stack into 'name', which must
--- be defined in the given symbol table
-local function emitStore(syms, name)
-  if not syms[name] then
-    die("undefined variable '%s'", name)
-  end
-  emit("pop r9")
-  emit("store r9, .%s_%s", syms[name].__stab_name, name)
-end
-
 -- load a variable from its label into the given register;
 -- the name must be defined in the given symbol table
 local function emitLoad(syms, name, register)
@@ -90,6 +80,22 @@ local function emitLoad(syms, name, register)
     die(debug.traceback("undefined variable '%s'"), name)
   end
   emit("load %s, .%s_%s", register, syms[name].__stab_name, name)
+end
+
+-- store a variable from the stack into 'name', which must
+-- be defined in the given symbol table
+local function emitStore(syms, name, ptr)
+  if not syms[name] then
+    die("undefined variable '%s'", name)
+  end
+
+  emit("pop r9")
+  if ptr then
+    emitLoad(syms, name, "r8")
+    emit("idstore r9, r8")
+  else
+    emit("store r9, .%s_%s", syms[name].__stab_name, name)
+  end
 end
 
 -- check if the top of the stack is 0, and if it isn't then
@@ -139,7 +145,7 @@ end
 function g.word()
   local tok = read()
   if (not tok) or tok.ttype ~= "word" then
-    die("expected variable name before '%s'", tok and tok.token or "<EOF>")
+    die(debug.traceback("expected variable name before '%s'"), tok and tok.token or "<EOF>")
   end
   return tok.token
 end
@@ -207,14 +213,14 @@ function g.declaration(syms)
 
   g.match(":")
 
-  local vtype = g.type()
-  syms[name] = {__stab_name = syms.__stab_name, type = vtype}
+  local vtype, ptr = g.type()
+  syms[name] = {__stab_name = syms.__stab_name, type = vtype, ptr = ptr}
   global_syms[syms.__stab_name.."_"..name] = syms[name]
 
   if g.look() == "=" then
     g.match("=")
     g.expression(syms)
-    emitStore(syms, name)
+    emitStore(syms, name, ptr)
   end
 
   g.match(";")
@@ -226,10 +232,17 @@ local types = {
 }
 
 function g.type()
+  local ptr = false
   local look = g.look()
+  if look == "@" then
+    g.match("@")
+    ptr = true
+    look = g.look()
+  end
+
   if types[look] then
     read()
-    return look
+    return look, ptr
   else
     die("invalid type specifier '%s'", look)
   end
@@ -349,15 +362,23 @@ function g.factor(syms)
   elseif tonumber(g.look()) then
     emit("pushi %d", g.number())
   else
-    local name = g.word()
-    if g.look() == "(" then
-      g.func_call(syms, name)
-    else
-      if not syms[name] then
-        die("undefined variable '%s'", name)
-      end
-      emitLoad(syms, name, "r9")
+    if g.look() == "@" then
+      g.match("@")
+      local name = g.word()
+      emitLoad(syms, name, "r8")
+      emit("idload r8, r9")
       emit("push r9")
+    else
+      local name = g.word()
+      if g.look() == "(" then
+        g.func_call(syms, name)
+      else
+        if not syms[name] then
+          die("undefined variable '%s'", name)
+        end
+        emitLoad(syms, name, "r9")
+        emit("push r9")
+      end
     end
   end
 end
@@ -407,19 +428,20 @@ function g._function(syms)
   g.match(")")
   g.match(":")
 
-  local rtype = g.type()
+  local rtype, rptr = g.type()
   fdata.ret = rtype
+  fdata.ptr = rptr
 
   emit(".%s", name)
   for n=#fdata.args, 1, -1 do
     local v = fdata.args[n]
-    emitStore(local_stable, v.name)
+    emitStore(local_stable, v.name, v.ptr)
   end
 
   g.block(local_stable, fret_label)
 
   emit(fret_label)
-  if rtype ~= "void" then
+  if rtype ~= "void" or rptr then
     -- the top value on the stack will always be the return value, if there
     -- is one.
     -- pop return value
@@ -444,10 +466,10 @@ function g.f_param_list(syms, fdata)
   while true do
     local name = g.word()
     g.match(":")
-    local vtype = g.type()
+    local vtype, vptr = g.type()
 
-    fdata.args[#fdata.args+1] = {name = name, type = vtype}
-    syms[name] = {__stab_name = syms.__stab_name, type = vtype}
+    fdata.args[#fdata.args+1] = {name = name, type = vtype, ptr = vptr}
+    syms[name] = {__stab_name = syms.__stab_name, type = vtype, ptr = vptr}
     global_syms[syms.__stab_name.."_"..name] = syms[name]
 
     look = g.look()
@@ -502,7 +524,13 @@ function g.block(syms, fr_lab, br_lab)
 end
 
 function g.assignment(syms)
+  local ptr = false
+  if g.look() == "@" then
+    g.match("@")
+    ptr = true
+  end
   local name = g.word()
+
   if not syms[name] then
     die("undefined variable '%s'", name)
   end
@@ -511,7 +539,7 @@ function g.assignment(syms)
 
   g.expression(syms)
 
-  emitStore(syms, name)
+  emitStore(syms, name, ptr)
 end
 
 function g.statement(syms, fret, bjmp)
@@ -533,7 +561,13 @@ end
 
 function g.return_statement(syms, fret)
   g.match("return")
-  if g.look() ~= ";" then
+  if g.look() == "@" then
+    g.match("@")
+    local name = g.word()
+    if syms[name] then
+      emit("pushi .%s_%s", syms[name].__stab_name, name)
+    end
+  elseif g.look() ~= ";" then
     g.expression(syms)
   end
   emit("jump a5, %s", fret)
@@ -662,7 +696,7 @@ end
 
 function g.allocate(name, vtype)
   emit(".%s", name)
-  emit("*dw%d 0", types[vtype.type])
+  emit("*dw%d 0", vtype.ptr and 3 or types[vtype.type])
 end
 
 emit("*offset %d", offset)

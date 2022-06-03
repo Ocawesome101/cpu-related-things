@@ -1,0 +1,25 @@
+// test pointer functionality
+
+entrypoint ptrtest;
+
+fn set(ptr: @int, value: int): void {
+  @ptr = value;
+}
+
+fn pwrite(char: int): void {
+  asm {
+    load r9, char;
+    pwrite r9, 0, 0, 0;
+  };
+}
+
+fn printptr(ptr: @int): void {
+  pwrite(@ptr);
+}
+
+fn ptrtest(): void {
+  var test: int = 0;
+  set(@test, 65);
+  printptr(@test);
+  asm { halt; };
+}
