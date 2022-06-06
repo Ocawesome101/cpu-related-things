@@ -4,7 +4,7 @@
 
 syn keyword tcllTodo contained TODO NOTE FIXME
 
-"syn region tcllString start=+"+ end=+"+
+syn region tcllString start=+"+ end=+"+
 "syn region tcllChar start=+'+ end=+'+
 
 syn match tcllOperator "[@\$=\+;!<>&~\^:,\*/\-|]"
@@ -21,6 +21,6 @@ hi def link tcllComment Comment
 hi def link tcllType Type
 hi def link tcllKeyword Keyword
 hi def link tcllOperator Operator
-"hi def link tcllString String
+hi def link tcllString String
 "hi def link tcllChar SpecialChar
 hi def link tcllNumber Number

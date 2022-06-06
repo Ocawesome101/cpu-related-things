@@ -22,7 +22,7 @@
 
 <func-call> ::= <ident> '(' <f-arg-list> ')'
 
-<type> ::= [ '@' ] ( int | void )
+<type> ::= [ '@' ] ( int | void ) [ '[' <number> ']' ]
 
 <function> ::= fn <ident> '(' <f-param-list> ')' ':' <type> <block>
 

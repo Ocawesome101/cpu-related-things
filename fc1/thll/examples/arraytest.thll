@@ -1,0 +1,21 @@
+entrypoint arraytest;
+
+fn pwrite(c: int): void {
+  asm {
+    load r9, c;
+    pwrite r9, 0, 0, 0;
+  };
+}
+
+fn print(char: @int): void {
+  while (@char > 0) {
+    pwrite(@char);
+    char = char + 1;
+  };
+}
+
+fn arraytest(): void {
+  var array: int[24] = "nice";
+  print(@array);
+  asm { halt; };
+}

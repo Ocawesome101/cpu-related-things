@@ -217,10 +217,23 @@ function g.declaration(syms)
   syms[name] = {__stab_name = syms.__stab_name, type = vtype, ptr = ptr}
   global_syms[syms.__stab_name.."_"..name] = syms[name]
 
+  if g.look() == "[" then
+    g.match("[")
+    local id = g.number()
+    syms[name].size = id
+    g.match("]")
+  end
+
   if g.look() == "=" then
     g.match("=")
-    g.expression(syms)
-    emitStore(syms, name, ptr)
+    if g.looktype() == "string" then
+      local str = read().token
+      syms[name].value = str
+      syms[name].size = syms[name].size or (#str + 1)
+    else
+      g.expression(syms)
+      emitStore(syms, name, ptr)
+    end
   end
 
   g.match(";")
@@ -694,9 +707,30 @@ function g.asm_line(syms)
   emit("%s", table.concat(line, " "))
 end
 
+local lookup = {
+  ["0"] = 0,
+  a = 1,
+  t = 9,
+  n = 10,
+  f = 12,
+  r = 13,
+}
+
 function g.allocate(name, vtype)
   emit(".%s", name)
-  emit("*dw%d 0", vtype.ptr and 3 or types[vtype.type])
+  if vtype.value then
+    local values = {}
+    for c in vtype.value:gmatch(".") do
+      if values[#values] == 92 and c ~= "\\" then
+        values[#values+1] = lookup[c]
+      else
+        values[#values+1] = c:byte()
+      end
+    end
+    emit("*dw%d %s", vtype.size, table.concat(values, " "));
+  else
+    emit("*dw%d 0", vtype.size or (vtype.ptr and 3 or types[vtype.type]))
+  end
 end
 
 emit("*offset %d", offset)

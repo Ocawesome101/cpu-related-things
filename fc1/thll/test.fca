@@ -1,69 +1,74 @@
 *offset 16384
-jump a5, .ptrtest
-.set
+jump a5, .arraytest
+.pwrite
 pop r9
-store r9, ._1H02c_value
-pop r9
-load r8, ._1H02c_ptr
-idstore r9, r8
-load r9, ._1H02c_value
-push r9
-pop r9
-load r8, ._1H02c_ptr
-idstore r9, r8
+store r9, ._GxdX2_c
+load r9 , ._GxdX2_c
+pwrite r9 , 0 , 0 , 0
 .l0
 pop r9
 idjump a5, r9
-.pwrite
+.print
 pop r9
-store r9, ._5So24_char
-load r9 , ._5So24_char
-pwrite r9 , 0 , 0 , 0
-.l1
-pop r9
-idjump a5, r9
-.printptr
-pop r9
-load r8, ._rEXS3_ptr
+load r8, ._2386I_char
 idstore r9, r8
-pushi .l3
-load r8, ._rEXS3_ptr
+.l2
+load r8, ._2386I_char
+idload r8, r9
+push r9
+pushi 0
+pop r9
+pop r8
+compare r8, r9
+imm r7, 0x4
+jump r7, .l3
+imm r9, 1
+jump a5, .l4
+.l3
+imm r9, 0
+.l4
+push r9
+imm r7, 0x10
+imm r8, 0
+pop r9
+compare r8, r9
+xori a5, 0x10
+jump r7, .l5
+pushi .l6
+load r8, ._2386I_char
 idload r8, r9
 push r9
 jump a5, .pwrite
-.l3
-.l2
-pop r9
-idjump a5, r9
-.ptrtest
-pushi 0
-pop r9
-store r9, ._ch564_test
-pushi .l5
-load r8, ._ch564_test
-idload r8, r9
-push r9
-pushi 65
-jump a5, .set
-.l5
-pushi .l6
-load r8, ._ch564_test
-idload r8, r9
-push r9
-jump a5, .printptr
 .l6
+load r9, ._2386I_char
+push r9
+pushi 1
+pop r8
+pop r9
+add r8, r9
+push r9
+pop r9
+store r9, ._2386I_char
+jump a5, .l2
+.l5
+.l1
+pop r9
+idjump a5, r9
+.arraytest
+pushi .l8
+load r8, ._01pTl_array
+idload r8, r9
+push r9
+jump a5, .print
+.l8
 halt
-.l4
+.l7
 pop r9
 idjump a5, r9
 halt
-._1H02c_value
-*dw4 0
-._ch564_test
-*dw4 0
-._1H02c_ptr
+._2386I_char
 *dw3 0
-._5So24_char
+._GxdX2_c
 *dw4 0
-._rEXS3_ptr
-*dw3 0
+._01pTl_array
+*dw24 34 110 105 99 101 34
