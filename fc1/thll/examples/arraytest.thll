@@ -8,14 +8,16 @@ fn pwrite(c: int): void {
 }
 
 fn print(char: @int): void {
+  pwrite(char);
   while (@char > 0) {
-    pwrite(@char);
+    pwrite(char);
     char = char + 1;
   };
 }
 
 fn arraytest(): void {
   var array: int[24] = "nice";
-  print(@array);
+  //pwrite(array);
+  print(array);
   asm { halt; };
 }

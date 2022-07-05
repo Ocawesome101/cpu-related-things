@@ -2,18 +2,23 @@
 jump a5, .arraytest
 .pwrite
 pop r9
-store r9, ._GxdX2_c
-load r9 , ._GxdX2_c
+store r9, ._ug076_c
+load r9 , ._ug076_c
 pwrite r9 , 0 , 0 , 0
 .l0
 pop r9
 idjump a5, r9
 .print
 pop r9
-load r8, ._2386I_char
+load r8, ._Cbtl4_char
 idstore r9, r8
+pushi .l2
+load r9, ._Cbtl4_char
+push r9
+jump a5, .pwrite
 .l2
-load r8, ._2386I_char
+.l3
+load r8, ._Cbtl4_char
 idload r8, r9
 push r9
 pushi 0
@@ -21,26 +26,25 @@ pop r9
 pop r8
 compare r8, r9
 imm r7, 0x4
-jump r7, .l3
+jump r7, .l4
 imm r9, 1
-jump a5, .l4
-.l3
-imm r9, 0
+jump a5, .l5
 .l4
+imm r9, 0
+.l5
 push r9
 imm r7, 0x10
 imm r8, 0
 pop r9
 compare r8, r9
 xori a5, 0x10
-jump r7, .l5
-pushi .l6
-load r8, ._2386I_char
-idload r8, r9
+jump r7, .l6
+pushi .l7
+load r9, ._Cbtl4_char
 push r9
 jump a5, .pwrite
-.l6
-load r9, ._2386I_char
+.l7
+load r9, ._Cbtl4_char
 push r9
 pushi 1
 pop r8
@@ -48,27 +52,26 @@ pop r9
 add r8, r9
 push r9
 pop r9
-store r9, ._2386I_char
-jump a5, .l2
-.l5
+store r9, ._Cbtl4_char
+jump a5, .l3
+.l6
 .l1
 pop r9
 idjump a5, r9
 .arraytest
-pushi .l8
-load r8, ._01pTl_array
-idload r8, r9
+pushi .l9
+load r9, ._5twk7_array
 push r9
 jump a5, .print
-.l8
+.l9
 halt
-.l7
+.l8
 pop r9
 idjump a5, r9
 halt
-._2386I_char
-*dw3 0
-._GxdX2_c
+._ug076_c
 *dw4 0
-._01pTl_array
+._Cbtl4_char
+*dw3 0
+._5twk7_array
 *dw24 34 110 105 99 101 34
