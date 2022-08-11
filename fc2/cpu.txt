@@ -1,16 +1,12 @@
 FC-2
 ====
 
-The FC-2 is a general-purpose 16-bit processor.  It supports up to 24MB of memory.  There are 48 16-bit general-purpose registers, 8 24-bit address registers, and 8 I/O registers.
+The FC-2 is a general-purpose 16-bit processor.  It supports up to 24MB of memory.  There are 48 16-bit general-purpose registers, 8 24-bit address registers, and 8 I/O registers.  There is no floating-point support.
 
 All I/O is done either through DMA or serial ports.
 
-Instruction Format:
-OPCODE[8] RGISTR A[8] RGISTR B[8] EXTRA[16]
-11111111  11111111    11111111    11111111111111111
-
 Syntax used here:
-  $beef is a memory address
+  $beef is the value at a memory address
   #beef is an immediate
   somevalueL and somevalueH refer to the 8 low and high bits of that
       value, respectively
@@ -18,27 +14,100 @@ Syntax used here:
 
   A -> B = a is stored in B
 
-MNEMONIC  CODE DESCRIPTION
-nop       0x00 Do nothing
-load           Load REG_A:
-          0x01 $(#REG_B+EXTRA)L -> REG_A
-          0x02 $(#REG_B+EXTRA)H -> REG_A
-          0x03 $(#REG_B+EXTRA)  -> REG_A
-          0x04 $(REG_B)L -> REG_A
-          0x05 $(REG_B)H -> REG_A
-          0x06 $(REG_B) -> REG_A
-          0x07 #(#REG_B+EXTRA) -> REG_A
-          0x08 REG_B -> REG_A
-store          Store:
-          0x11 (REG_A)L -> $(#REG_B+EXTRA)
-          0x12 (REG_A)H -> $(#REG_B+EXTRA)
-          0x13 (REG_A)  -> $(#REG_B+EXTRA)
-          0x14 (REG_A)L -> $(REG_B)
-          0x15 (REG_A)H -> $(REG_B)
-          0x16 (REG_A)  -> $(REG_B)
-          0x17 (REG_A)  -> #(#REG_B+EXTRA)
+Instruction format:
 
-jump           Jump places:
-jump      0x20 (REG_A)  -> (PC)
-          0x21 (REG_
+CLASS[4] SUB[4] DATA[32]
 
+CLASS 0 (0000): load-type
+  DATA:
+      REG_A[8] REG_B[8] EXTRA[16]
+   or REG_A[8] ADDR[24]
+
+  SUB:
+
+    bit 1: low byte
+    bit 2: high byte
+    bits 1 & 2 = low and high
+
+    bit 3: off = use immediate address, on = get address from REG_B
+    bit 4: off = ADDR is address, on = ADDR is immediate
+
+    0000: nothing
+    0001: $(ADDR)L  -> REG_A
+    0010: $(ADDR)H  -> REG_A
+    0011: $(ADDR)   -> REG_A
+    0100: nothing
+    0101: $(REG_B)L -> REG_A
+    0110: $(REG_B)H -> REG_A
+    0111: $(REG_B)  -> REG_A
+    1000: nothing
+    1001: nothing
+    1010: nothing
+    1011: #(ADDR)   -> REG_A
+    1100: nothing
+    1101: nothing
+    1110: nothing
+    1111: REG_B     -> REG_A
+
+CLASS 1 (0001): store-type
+  DATA:
+      REG_A[8] REG_B[8] extra[16]
+   or REG_A[8] ADDR[24]
+
+  SUB:
+    bit 1: low byte
+    bit 2: high byte
+    bits 1 & 2 = low and high
+    bit 3: off = to immediate addr, on = to address in REG_B
+
+    0000: nothing
+    0001: (REG_A)L -> $(ADDR)
+    0010: (REG_A)H -> $(ADDR)
+    0011: (REG_A)  -> $(ADDR)
+    0100: nothing
+    0101: (REG_A)L -> $(REG_B)
+    0110: (REG_A)H -> $(REG_B)
+    0111: (REG_A)  -> $(REG_B)
+
+CLASS 2 (0010): branch-type
+  DATA:
+      REG_A[8] REG_B[8] REG_C[8] extra[8]
+   or REG_A[8] ADDR[24]
+
+  SUB:
+    bit 4: branch (comparison) if unset, otherwise unconditional jump
+    bit 1: jump to register if unset, otherwise jump to immediate address
+    
+    0000: (REG_C)   if REG_A > REG_B
+    0001: (ADDRESS) if REG_A > REG_B
+    0010: (REG_C)   if REG_A == REG_B
+    0011: (ADDRESS) if REG_A == REG_B
+    0100: (REG_C)   if REG_A != REG_B
+    0101: (ADDRESS) if REG_A != REG_B
+    0110: nothing
+    0111: nothing
+    1000: (REG_A)   unconditionally
+    1001: (ADDRESS) unconditionally
+
+CLASS 3 (0011): arithmetic/bitops
+  DATA:
+      REG_A[8] REG_B[8] REG_C[8] extra[8]
+   or REG_A[8] VALUE[8]
+
+  SUB:
+    0001: REG_A = REG_B + REG_C
+    0010: REG_A = REG_B - REG_C
+    0011: REG_A = REG_B * REG_C
+    0100: REG_A = REG_B / REG_C
+    0101: REG_A = REG_B % REG_C
+    1000: REG_A = REG_B AND REG_C
+    1001: REG_A = REG_B OR  REG_C
+    1010: REG_A = REG_B XOR REG_C
+    1011: REG_A = NOT REG_B
+    1100: REG_A = REG_B LSHIFT BY REG_C
+    1101: REG_A = REG_B LSHIFT BY #VALUE
+    1110: REG_A = REG_B RSHIFT BY REG_C
+    1111: REG_A = REG_B RSHIFT BY #VALUE
+
+CLASS 4 (0100): I/O instructions
+    
