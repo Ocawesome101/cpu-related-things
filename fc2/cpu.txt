@@ -1,0 +1,44 @@
+FC-2
+====
+
+The FC-2 is a general-purpose 16-bit processor.  It supports up to 24MB of memory.  There are 48 16-bit general-purpose registers, 8 24-bit address registers, and 8 I/O registers.
+
+All I/O is done either through DMA or serial ports.
+
+Instruction Format:
+OPCODE[8] RGISTR A[8] RGISTR B[8] EXTRA[16]
+11111111  11111111    11111111    11111111111111111
+
+Syntax used here:
+  $beef is a memory address
+  #beef is an immediate
+  somevalueL and somevalueH refer to the 8 low and high bits of that
+      value, respectively
+  #REG_B is the literal value of REG_B rather than the register's contents
+
+  A -> B = a is stored in B
+
+MNEMONIC  CODE DESCRIPTION
+nop       0x00 Do nothing
+load           Load REG_A:
+          0x01 $(#REG_B+EXTRA)L -> REG_A
+          0x02 $(#REG_B+EXTRA)H -> REG_A
+          0x03 $(#REG_B+EXTRA)  -> REG_A
+          0x04 $(REG_B)L -> REG_A
+          0x05 $(REG_B)H -> REG_A
+          0x06 $(REG_B) -> REG_A
+          0x07 #(#REG_B+EXTRA) -> REG_A
+          0x08 REG_B -> REG_A
+store          Store:
+          0x11 (REG_A)L -> $(#REG_B+EXTRA)
+          0x12 (REG_A)H -> $(#REG_B+EXTRA)
+          0x13 (REG_A)  -> $(#REG_B+EXTRA)
+          0x14 (REG_A)L -> $(REG_B)
+          0x15 (REG_A)H -> $(REG_B)
+          0x16 (REG_A)  -> $(REG_B)
+          0x17 (REG_A)  -> #(#REG_B+EXTRA)
+
+jump           Jump places:
+jump      0x20 (REG_A)  -> (PC)
+          0x21 (REG_
+
