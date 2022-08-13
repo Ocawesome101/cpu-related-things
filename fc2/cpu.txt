@@ -1,9 +1,13 @@
 FC-2
 ====
 
-The FC-2 is a general-purpose 16-bit processor.  It supports up to 24MB of memory.  There are 48 16-bit general-purpose registers, 8 24-bit address registers, and 8 I/O registers.  There is no floating-point support.
+The FC-2 is a general-purpose 16-bit processor supporting up to 64KB of memory.  There are 56 general-purpose registers and 8 parameter registers, all of them 16-bit.  There is no floating-point support.
 
-All I/O is done either through DMA or serial ports.
+All I/O is done either through DMA or serial ports.  There are 4 serial ports.
+
+
+The FC-2 should not be confused with the rather oddball FC-1.
+
 
 Syntax used here:
   $beef is the value at a memory address
@@ -11,17 +15,19 @@ Syntax used here:
   somevalueL and somevalueH refer to the 8 low and high bits of that
       value, respectively
   #REG_B is the literal value of REG_B rather than the register's contents
+  @REG_X is the port stored in REG_X
+  @someval is the port someval
 
   A -> B = a is stored in B
 
 Instruction format:
 
-CLASS[4] SUB[4] DATA[32]
+CLASS[4] SUB[4] DATA[24]
 
 CLASS 0 (0000): load-type
   DATA:
-      REG_A[8] REG_B[8] EXTRA[16]
-   or REG_A[8] ADDR[24]
+      REG_A[8] REG_B[8] extra[8]
+   or REG_A[8] ADDR[16]
 
   SUB:
 
@@ -51,8 +57,8 @@ CLASS 0 (0000): load-type
 
 CLASS 1 (0001): store-type
   DATA:
-      REG_A[8] REG_B[8] extra[16]
-   or REG_A[8] ADDR[24]
+      REG_A[8] REG_B[8] extra[8]
+   or REG_A[8] ADDR[16]
 
   SUB:
     bit 1: low byte
@@ -71,8 +77,8 @@ CLASS 1 (0001): store-type
 
 CLASS 2 (0010): branch-type
   DATA:
-      REG_A[8] REG_B[8] REG_C[8] extra[8]
-   or REG_A[8] ADDR[24]
+      REG_A[8] REG_B[8] REG_C[8]
+   or REG_A[8] ADDR[16]
 
   SUB:
     bit 4: branch (comparison) if unset, otherwise unconditional jump
@@ -91,10 +97,11 @@ CLASS 2 (0010): branch-type
 
 CLASS 3 (0011): arithmetic/bitops
   DATA:
-      REG_A[8] REG_B[8] REG_C[8] extra[8]
-   or REG_A[8] VALUE[8]
+      REG_A[8] REG_B[8] REG_C[8]
+   or REG_A[8] VALUE[16]
 
   SUB:
+    0000: nothing
     0001: REG_A = REG_B + REG_C
     0010: REG_A = REG_B - REG_C
     0011: REG_A = REG_B * REG_C
@@ -109,5 +116,42 @@ CLASS 3 (0011): arithmetic/bitops
     1110: REG_A = REG_B RSHIFT BY REG_C
     1111: REG_A = REG_B RSHIFT BY #VALUE
 
-CLASS 4 (0100): I/O instructions
-    
+CLASS 4 (0100): serial I/O instructions
+  DATA:
+      REG_A[8] REG_B[8] extra[8]
+   or PORT[8]  REG_A[8] extra[8]
+
+  SUB:
+    0000: REG_A   -> @REG_B
+    0001: @REG_B  -> REG_A
+    0010: REG_A   -> @(#PORT)
+    0011: @(#PORT)-> REG_A
+
+other classes reserved for future ISA revisions
+
+CLASS 15 (0101): interrupts
+  DATA:
+      REG_A[8] extra[16]
+   or CODE[8]  extra[16]
+
+  SUB:
+    0000: fire interupt REG_A
+    0001: fire interrupt #CODE
+
+
+Parameter Register 8 (PR8) tells the CPU where to find the interrupt vector table.  Other PRegs should be used for passing parameters to subroutines.
+
+  00000000 RESET
+  00000001 
+  00000010 TIMER0   Timer 0
+  00000011 TIMER1   Timer 1
+  00001000 IODVC0   IO Device 0 is ready
+  00001001 IODVC1   IO Device 1 is ready
+  00001010 IODVC2   IO Device 2 is ready
+  00001011 IODVC3   IO Device 3 is ready
+  00001100 IODVC4   IO Device 4 is ready
+  00001101 IODVC5   IO Device 5 is ready
+  00001110 IODVC6   IO Device 6 is ready
+  00001111 IODVC7   IO Device 7 is ready
+
+The Interrupt Descriptor Table is a table of 256 16-bit addresses to which the CPU should jump when an interrupt is fired.
