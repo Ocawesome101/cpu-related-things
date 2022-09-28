@@ -1,0 +1,88 @@
+; very basic FC-1 machine language monitor
+
+*offset 0x4000
+
+; emulator code goes at 0x8000
+imm r0, 0x8000
+
+.main
+  pushi .ret1
+  jump a5, .writehex
+  .ret1
+  imm r1, 0x3A
+  pwrite r1, 0, 0, 0
+  imm r1, 0x20
+  pwrite r1, 0, 0, 0
+  pushi .ret2
+  jump a5, .readhex
+  .ret2
+  jump a5, .main
+
+.write
+  imm r2, 0
+  imm r3, 0x4
+  .write_loop
+    idload r0, r1
+    pwrite r1, 0, 0, 0
+    compare r1, r2
+    addi r0, 1
+    jump r3, .write_loop
+  pop r5
+  idjump a5, r5
+
+.writehex
+  move r0, r1
+  imm r2, 4
+  imm r3, 0
+  imm r4, 0x4
+  .whex_loop
+    move r1, r5
+    andi r5, 0xF000
+    lshifti r1, 4
+    rshifti r5, 12
+    subi r2, 1
+    addi r5, .hex_lut
+    idload r5, r5
+    pwrite r5, 0, 0, 0
+    compare r2, r3
+    jump r4, .whex_loop
+  pop r5
+  idjump a5, r5
+
+.readhex
+  imm r1, .in_buffer
+  imm r3, 0x0A
+  imm r4, 0x8
+  imm r5, 0x4
+  imm r6, 48
+  imm r7, 16
+  .readhex_loop
+    pread r2, 0, 0, 0
+    compare r2, r3
+    jump r4, .readhex_ret
+    subi r2, 48
+    compare r2, r6
+    jump r5, .readhex_lower
+    .readhex_check
+    compare r2, r7
+    jump r5, .readhex_sub
+    .readhex_write
+    
+    jump a5, .readhex_loop
+  .readhex_ret
+  pop r5
+  idjump a5, r5
+
+.readhex_lower
+  xori r2, 0x20
+  jump a5, .readhex_check
+
+.readhex_sub
+  subi r2, 16
+  jump a5, .readhex_write
+
+.hex_lut
+*dw "0123456789ABCDEF"
+
+.in_buffer
+*dw256 0
